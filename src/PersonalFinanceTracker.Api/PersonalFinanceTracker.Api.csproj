@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <InvariantGlobalization>true</InvariantGlobalization>
         <NoWarn>$(NoWarn);1591</NoWarn>
+        <UserSecretsId>bef90518-a23b-4b96-8992-6e973a9c585f</UserSecretsId>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -15,9 +16,12 @@
     <ItemGroup>
         <PackageReference Include="Asp.Versioning.Mvc" Version="8.0.0" />
         <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.0.0" />
+        <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
         <PackageReference Include="JWT" Version="10.1.1" />
         <PackageReference Include="Mapster" Version="7.0.0" />
+        <PackageReference Include="MicroElements.Swashbuckle.FluentValidation" Version="6.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.11" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.1"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.11" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.11">

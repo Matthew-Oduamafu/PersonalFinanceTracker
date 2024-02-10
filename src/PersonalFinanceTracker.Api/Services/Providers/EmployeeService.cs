@@ -1,4 +1,6 @@
-﻿using Mapster;
+﻿using System.Linq.Expressions;
+using Mapster;
+using Microsoft.EntityFrameworkCore.Query;
 using PersonalFinanceTracker.Api.Extensions;
 using PersonalFinanceTracker.Api.Models;
 using PersonalFinanceTracker.Api.Services.Interfaces;
@@ -60,7 +62,7 @@ public class EmployeeService : IEmployeeService
         try
         {
             var employees = await _employeeRepository.GetEmployeesAsQueryable()
-                .OrderBy(e=>e.CreatedAt)
+                .OrderBy(e => e.CreatedAt)
                 .ProjectToType<EmployeeResponse>()
                 .ToPagedList(filter.Page, filter.PageSize);
 
@@ -89,16 +91,24 @@ public class EmployeeService : IEmployeeService
         }
     }
 
-    public async Task<IGenericApiResponse<EmployeeResponse>> UpdateEmployeeAsync(string id, EmployeeRequest employeeRequest)
+    public async Task<IGenericApiResponse<EmployeeResponse>> UpdateEmployeeAsync(string id,
+        EmployeeRequest employeeRequest)
     {
         try
         {
             var employee = await _employeeRepository.GetEmployeeByIdAsync(id);
             if (employee == null) return GenericApiResponse<EmployeeResponse>.Default.ToNotFoundApiResponse();
 
-            employee = employeeRequest.Adapt(employee);
-            _employeeRepository.UpdateEmployeeAsync(employee);
-            await _pgRepository.SaveChangesAsync();
+            Expression<Func<SetPropertyCalls<Employee>, SetPropertyCalls<Employee>>> setPropertyExpression = calls =>
+                calls
+                    .SetProperty(p => p.Name, employeeRequest.Name)
+                    .SetProperty(p => p.JobTitle, employeeRequest.JobTitle)
+                    .SetProperty(p => p.Salary, employeeRequest.Salary);
+
+            var result = await _employeeRepository.UpdateAsync(employee.Id, setPropertyExpression);
+            
+            if (!result) return GenericApiResponse<EmployeeResponse>.Default.ToFailedDependenciesApiResponse();
+
             return employee.Adapt<EmployeeResponse>().ToOkApiResponse();
         }
         catch (Exception ex)

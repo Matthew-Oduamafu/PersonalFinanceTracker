@@ -1,7 +1,12 @@
+using System.Reflection;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using PersonalFinanceTracker.Api;
 using PersonalFinanceTracker.Api.Extensions;
 using PersonalFinanceTracker.Api.Extensions.EndpointsExtensions;
 using PersonalFinanceTracker.Api.Services.Interfaces;
+using PersonalFinanceTracker.Api.Validations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +30,11 @@ builder.Services.AddJwtConfiguration(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerDocumentation();
+
+builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddFluentValidationRulesToSwagger();
 
 var app = builder.Build();
 

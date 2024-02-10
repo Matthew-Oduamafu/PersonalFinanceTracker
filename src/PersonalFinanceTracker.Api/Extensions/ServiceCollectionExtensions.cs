@@ -2,6 +2,7 @@
 using System.Text;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -10,6 +11,8 @@ using PersonalFinanceTracker.Api.Options;
 using PersonalFinanceTracker.Api.Services.Interfaces;
 using PersonalFinanceTracker.Api.Services.Providers;
 using PersonalFinanceTracker.Data.Data;
+using PersonalFinanceTracker.Data.Data.Entities;
+using PersonalFinanceTracker.Data.Options;
 using PersonalFinanceTracker.Data.Repositories.Interfaces;
 using PersonalFinanceTracker.Data.Repositories.Providers;
 
@@ -21,7 +24,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-        services.AddScoped<IAppUserRepository, AppUserRepository>();
+        services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<IGoalRepository, GoalRepository>();
+        services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IPgRepository, PgRepository>();
         return services;
     }
@@ -37,6 +42,11 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDatabaseConfiguration(this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.AddOptions<DefaultUserConfig>()
+            .BindConfiguration(nameof(DefaultUserConfig))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        
         services.AddOptions<DatabaseConfig>()
             .BindConfiguration(nameof(DatabaseConfig))
             .Configure(c => { c.DbConnectionString = configuration.GetConnectionString("DbConnection")!; })
@@ -58,6 +68,12 @@ public static class ServiceCollectionExtensions
                 builder.CommandTimeout(dbConfig.CommandTimeout);
             });
         });
+        
+        services.AddIdentityCore<AppUser>()
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders(); 
+        
         return services;
     }
 

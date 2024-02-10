@@ -13,8 +13,8 @@ public static class EmployeeEndpoints
             .WithTags("Employees");
 
         group.MapGet("",
-                async ([FromServices] IEmployeeService employeeService, [FromQuery] int page,
-                    [FromQuery] int pageSize) =>
+                async ([FromServices] IEmployeeService employeeService, [FromQuery] int page = 1,
+                    [FromQuery] int pageSize = 10) =>
                 {
                     var filter = new BaseFilter { Page = page, PageSize = pageSize };
                     var response = await employeeService.GetEmployees(filter);
@@ -35,6 +35,18 @@ public static class EmployeeEndpoints
                 AddLinksForEmployee(response, linkService);
                 return TypedResults.Created($"/api/employees/{response?.Data?.Id}", response);
             }).WithName("CreateEmployee")
+            .Produces<EmployeeResponse>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status500InternalServerError)
+            .WithOpenApi();
+
+        // post endpoint
+        group.MapPut("{id}", async ([FromServices] IEmployeeService employeeService, [FromBody] EmployeeRequest request, [FromRoute] string id) =>
+            {
+                var response = await employeeService.UpdateEmployeeAsync(id, request);
+                AddLinksForEmployee(response, linkService);
+                return TypedResults.Accepted($"/api/employees/{response?.Data?.Id}", response);
+            }).WithName("UpdateEmployee")
             .Produces<EmployeeResponse>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError)

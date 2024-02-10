@@ -1,4 +1,6 @@
-﻿using PersonalFinanceTracker.Data.Data.Entities;
+﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Query;
+using PersonalFinanceTracker.Data.Data.Entities;
 
 namespace PersonalFinanceTracker.Data.Repositories.Interfaces;
 
@@ -9,5 +11,7 @@ public interface IEmployeeRepository
     IQueryable<Employee> GetEmployeesAsQueryable();
     Task<Employee> AddEmployeeAsync(Employee employee);
     Employee UpdateEmployeeAsync(Employee employee);
+    public Task<bool> UpdateAsync(string id, 
+        Expression<Func<SetPropertyCalls<Employee>, SetPropertyCalls<Employee>>> setPropertyExpression);
     Employee DeleteEmployeeAsync(Employee employee);
 }

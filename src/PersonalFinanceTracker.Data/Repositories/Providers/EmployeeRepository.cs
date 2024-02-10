@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using PersonalFinanceTracker.Data.Data;
 using PersonalFinanceTracker.Data.Data.Entities;
 using PersonalFinanceTracker.Data.Repositories.Interfaces;
@@ -39,6 +41,14 @@ public class EmployeeRepository : IEmployeeRepository
     {
         _dbContext.Employees.Update(employee);
         return employee;
+    }
+
+    public async Task<bool> UpdateAsync(string id, Expression<Func<SetPropertyCalls<Employee>, SetPropertyCalls<Employee>>> setPropertyExpression)
+    {
+        var res = await _dbContext.Employees
+            .Where(x=> id.Equals(x.Id))
+            .ExecuteUpdateAsync(setPropertyExpression);
+        return res > 0;
     }
 
     public Employee DeleteEmployeeAsync(Employee employee)

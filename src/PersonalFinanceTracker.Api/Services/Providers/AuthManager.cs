@@ -1,6 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Mapster;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using PersonalFinanceTracker.Api.Extensions;
@@ -15,15 +17,16 @@ namespace PersonalFinanceTracker.Api.Services.Providers;
 
 public class AuthManager : IAuthManager
 {
-    private readonly IAppUserRepository _appUserRepo;
     private readonly ILogger<AuthManager> _logger;
     private readonly JwtConfig _jwtConfig;
+    private readonly UserManager<AppUser> _userManager;
 
-    public AuthManager(IAppUserRepository appUserRepo,
-        ILogger<AuthManager> logger, IOptionsMonitor<JwtConfig> jwtConfigOpt)
+    public AuthManager(ILogger<AuthManager> logger,
+        IOptionsMonitor<JwtConfig> jwtConfigOpt,
+        UserManager<AppUser> userManager)
     {
-        _appUserRepo = appUserRepo;
         _logger = logger;
+        _userManager = userManager;
         _jwtConfig = jwtConfigOpt.CurrentValue;
     }
 
@@ -31,24 +34,28 @@ public class AuthManager : IAuthManager
     {
         try
         {
-            var existingUser = await _appUserRepo.GetByUseNameAndEmailAsync(user.UserName, user.Email);
+            var existingUser = await _userManager.FindByEmailAsync(user.Email);
             if (existingUser != null)
                 return GenericApiResponse<LoginOrRegisterResponseDto>.Default.ToBadRequestApiResponse(
                     "User already exists");
 
-            var newUser = new AppUser
-            {
-                UserName = user.UserName,
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Salt = user.Salt,
-                PasswordHash = AuthManagerExtensions.GeneratePasswordHash(user.Password, user.Salt)
-            };
+            existingUser = await _userManager.FindByNameAsync(user.UserName);
+            if (existingUser != null)
+                return GenericApiResponse<LoginOrRegisterResponseDto>.Default.ToBadRequestApiResponse(
+                    "User already exists");
 
-            var result = await _appUserRepo.CreateAsync(newUser);
-            
-            if(!result) return GenericApiResponse<LoginOrRegisterResponseDto>.Default.ToFailedDependenciesApiResponse();
+            var newUser = user.Adapt<AppUser>();
+
+            var result = await _userManager.CreateAsync(newUser, user.Password);
+
+            if (!result.Succeeded)
+            {
+                var errors = result.Errors.Select(e => new ErrorResponse(e.Code, e.Description));
+                return GenericApiResponse<LoginOrRegisterResponseDto>.Default.ToFailedDependenciesApiResponse(
+                    errors: errors);
+            }
+
+            await _userManager.AddToRoleAsync(newUser, "User");
 
             var response = new LoginOrRegisterResponseDto
             {
@@ -68,15 +75,16 @@ public class AuthManager : IAuthManager
     {
         try
         {
-            var existingUser = await _appUserRepo.GetByUseNameAsync(user.Username);
+            var existingUser = await _userManager.FindByEmailAsync(user.Username);
             if (existingUser == null)
-                return GenericApiResponse<LoginOrRegisterResponseDto>.Default.ToUnAuthorizedApiResponse(
-                    "Invalid credentials");
+                return GenericApiResponse<LoginOrRegisterResponseDto>.Default.ToBadRequestApiResponse(
+                    "Email is not registered");
 
-            var passwordHash = AuthManagerExtensions.GeneratePasswordHash(user.Password, existingUser.Salt);
-            if (!passwordHash.Equals(existingUser.PasswordHash))
-                return GenericApiResponse<LoginOrRegisterResponseDto>.Default.ToUnAuthorizedApiResponse(
-                    "Invalid credentials");
+            var isCorrect = await _userManager.CheckPasswordAsync(existingUser, user.Password);
+
+            if (!isCorrect)
+                return GenericApiResponse<LoginOrRegisterResponseDto>.Default.ToBadRequestApiResponse(
+                    "Invalid password");
 
             var response = new LoginOrRegisterResponseDto
             {
@@ -100,27 +108,29 @@ public class AuthManager : IAuthManager
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(_jwtConfig.Key);
         var secret = new SymmetricSecurityKey(key);
-        
+
+        var roles = await _userManager.GetRolesAsync(user);
+        var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role));
+        var userClaims = await _userManager.GetClaimsAsync(user);
+
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Role, "User"),
-            }),
+                new Claim(ClaimTypes.Email, user.Email!),
+                new Claim(ClaimTypes.Name, user.UserName!),
+            }.Union(roleClaims).Union(userClaims)),
+            
             Expires = DateTime.UtcNow.AddMinutes(_jwtConfig.AccessTokenExpiration),
             SigningCredentials = new SigningCredentials(secret, SecurityAlgorithms.HmacSha256Signature),
             Issuer = _jwtConfig.Issuer,
             Audience = _jwtConfig.Audience
         };
-        
+
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        
-        await Task.CompletedTask;
-        
+
         return tokenHandler.WriteToken(token);
     }
 

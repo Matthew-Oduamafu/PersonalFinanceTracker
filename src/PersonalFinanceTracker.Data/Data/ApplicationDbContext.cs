@@ -1,4 +1,5 @@
 using System.Reflection;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -6,7 +7,7 @@ using PersonalFinanceTracker.Data.Data.Entities;
 
 namespace PersonalFinanceTracker.Data.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext<AppUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
@@ -14,14 +15,14 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<Employee> Employees => Set<Employee>();
-    public DbSet<AppUser> Users => Set<AppUser>();
+    public DbSet<Account> Accounts => Set<Account>();
+    public DbSet<Goal> Goals => Set<Goal>();
+    public DbSet<Transaction> Transactions => Set<Transaction>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
+        base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
-        builder.Entity<Employee>().ToTable("Employees");
-        builder.Entity<AppUser>().ToTable("Users");
     }
 }
 

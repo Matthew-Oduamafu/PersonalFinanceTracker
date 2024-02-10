@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using PersonalFinanceTracker.Api.CustomFilters;
 using PersonalFinanceTracker.Api.Services.Interfaces;
 using PersonalFinanceTracker.Data.Models.Dtos;
 
@@ -16,6 +17,7 @@ public static class AuthEndpoints
                 var res = await authManager.RegisterUserAsync(user);
                 return TypedResults.Json(res);
             })
+            .AddEndpointFilter<ValidationFilter<AppUserDto>>()
             .WithName("RegisterUser")
             .Produces<LoginOrRegisterResponseDto>()
             .Produces(StatusCodes.Status424FailedDependency)
@@ -29,6 +31,7 @@ public static class AuthEndpoints
                 var res = await authManager.LoginAsync(user);
                 return TypedResults.Json(res);
             })
+            .AddEndpointFilter<ValidationFilter<LoginUserDto>>()
             .WithName("LoginUser")
             .Produces<LoginOrRegisterResponseDto>()
             .Produces(StatusCodes.Status401Unauthorized)
