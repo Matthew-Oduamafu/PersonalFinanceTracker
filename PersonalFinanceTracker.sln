@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{72093CEB-96E2-4441-9620-D723017B3828}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "APIs", "APIs", "{245957DD-124C-4A4C-97B0-B768CF6A1FC9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Commons", "Commons", "{A3E34FFD-72E3-4272-9D64-8BF8FC065DA2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonalFinanceTracker.Api", "src\PersonalFinanceTracker.Api\PersonalFinanceTracker.Api.csproj", "{C38E68CC-0B58-486C-A8AF-7487347D20DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonalFinanceTracker.Data", "src\PersonalFinanceTracker.Data\PersonalFinanceTracker.Data.csproj", "{64F68811-1B48-4060-9C60-B13627CB4BFD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{245957DD-124C-4A4C-97B0-B768CF6A1FC9} = {72093CEB-96E2-4441-9620-D723017B3828}
+		{A3E34FFD-72E3-4272-9D64-8BF8FC065DA2} = {72093CEB-96E2-4441-9620-D723017B3828}
+		{C38E68CC-0B58-486C-A8AF-7487347D20DB} = {245957DD-124C-4A4C-97B0-B768CF6A1FC9}
+		{64F68811-1B48-4060-9C60-B13627CB4BFD} = {A3E34FFD-72E3-4272-9D64-8BF8FC065DA2}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C38E68CC-0B58-486C-A8AF-7487347D20DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C38E68CC-0B58-486C-A8AF-7487347D20DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C38E68CC-0B58-486C-A8AF-7487347D20DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C38E68CC-0B58-486C-A8AF-7487347D20DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64F68811-1B48-4060-9C60-B13627CB4BFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64F68811-1B48-4060-9C60-B13627CB4BFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64F68811-1B48-4060-9C60-B13627CB4BFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64F68811-1B48-4060-9C60-B13627CB4BFD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
