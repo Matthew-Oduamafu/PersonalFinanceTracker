@@ -46,7 +46,7 @@ public static class ServiceCollectionExtensions
             .BindConfiguration(nameof(DefaultUserConfig))
             .ValidateDataAnnotations()
             .ValidateOnStart();
-        
+
         services.AddOptions<DatabaseConfig>()
             .BindConfiguration(nameof(DatabaseConfig))
             .Configure(c => { c.DbConnectionString = configuration.GetConnectionString("DbConnection")!; })
@@ -56,24 +56,26 @@ public static class ServiceCollectionExtensions
         services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
         {
             var dbConfig = serviceProvider.GetRequiredService<IOptions<DatabaseConfig>>().Value;
-            options.UseMySql(dbConfig.DbConnectionString, ServerVersion.AutoDetect(dbConfig.DbConnectionString), builder =>
-            {
-                if (dbConfig.EnableRetryOnFailure)
+            options.UseMySql(dbConfig.DbConnectionString, ServerVersion.AutoDetect(dbConfig.DbConnectionString),
+                builder =>
                 {
-                    builder.EnableRetryOnFailure(dbConfig.MaxRetryCount,
-                        TimeSpan.FromMilliseconds(dbConfig.MaxRetryDelay),
-                        dbConfig.ErrorNumbersToAdd);
-                }
+                    if (dbConfig.EnableRetryOnFailure)
+                    {
+                        builder.EnableRetryOnFailure(dbConfig.MaxRetryCount,
+                            TimeSpan.FromMilliseconds(dbConfig.MaxRetryDelay),
+                            dbConfig.ErrorNumbersToAdd);
+                    }
 
-                builder.CommandTimeout(dbConfig.CommandTimeout);
-            });
+                    builder.CommandTimeout(dbConfig.CommandTimeout);
+                });
         });
-        
+
         services.AddIdentityCore<AppUser>()
             .AddRoles<IdentityRole>()
+            .AddTokenProvider<DataProtectorTokenProvider<AppUser>>("PersonalFinanceTracker")
             .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders(); 
-        
+            .AddDefaultTokenProviders();
+
         return services;
     }
 
@@ -84,23 +86,23 @@ public static class ServiceCollectionExtensions
             options.LowercaseUrls = true;
             options.LowercaseQueryStrings = true;
         });
-        
+
         return services;
     }
-    
+
     public static IServiceCollection AddJwtConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions<JwtConfig>()
             .BindConfiguration(nameof(JwtConfig))
             .ValidateDataAnnotations()
             .ValidateOnStart();
-        
+
         Action<JwtConfig> jwtConfigAction = jwtConfigOpt =>
             configuration.GetSection(nameof(JwtConfig)).Bind(jwtConfigOpt);
         var jwtConfig = new JwtConfig();
         jwtConfigAction.Invoke(jwtConfig);
-        
-        
+
+
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -118,9 +120,8 @@ public static class ServiceCollectionExtensions
                 ValidAudience = jwtConfig.Audience,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Key)),
                 ClockSkew = TimeSpan.Zero,
-                
             };
-    
+
             options.Events = new JwtBearerEvents
             {
                 OnAuthenticationFailed = context =>
@@ -129,15 +130,16 @@ public static class ServiceCollectionExtensions
                     {
                         context.Response.Headers.Append("Token-Expired", "true");
                     }
+
                     return Task.CompletedTask;
                 }
             };
-    
+
             options.RequireHttpsMetadata = false;
             options.SaveToken = true;
             options.IncludeErrorDetails = true;
         });
-        
+
         return services;
     }
 
@@ -146,7 +148,7 @@ public static class ServiceCollectionExtensions
         services.AddSwaggerGen(c =>
         {
             c.CustomSchemaIds(type => type.FullName ?? type.Name);
-            
+
             c.SwaggerDoc("v1", new OpenApiInfo
             {
                 Title = "Minimal API .NET 8 Template",
@@ -169,10 +171,11 @@ public static class ServiceCollectionExtensions
             });
 
             c.EnableAnnotations();
-            
+
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
-                Description = "JWT Authorization header using the Bearer scheme. \r\n\r\nEnter 'Bearer' [space] an then your token in the next input below.\r\n\r\nExample: 'Bearer 1234etetrf'",
+                Description =
+                    "JWT Authorization header using the Bearer scheme. \r\n\r\nEnter 'Bearer' [space] an then your token in the next input below.\r\n\r\nExample: 'Bearer 1234etetrf'",
                 Name = "Authorization",
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.ApiKey,
@@ -180,7 +183,8 @@ public static class ServiceCollectionExtensions
             });
 
             c.AddSecurityRequirement(new OpenApiSecurityRequirement()
-            {{
+            {
+                {
                     new OpenApiSecurityScheme
                     {
                         Reference = new OpenApiReference
@@ -188,14 +192,14 @@ public static class ServiceCollectionExtensions
                             Type = ReferenceType.SecurityScheme,
                             Id = "Bearer"
                         },
-                        Scheme ="oauth2",
+                        Scheme = "oauth2",
                         Name = "Bearer",
                         In = ParameterLocation.Header,
                     },
                     new List<string>()
                 }
             });
-            
+
             // Optionally, add XML comments:
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);

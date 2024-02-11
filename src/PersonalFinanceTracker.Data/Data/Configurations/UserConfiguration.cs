@@ -11,7 +11,7 @@ public class UserConfiguration : IEntityTypeConfiguration<AppUser>
     {
         var user = new AppUser
         {
-            Id = "71538c31f99f42078133f5e4c249d6f1",
+            Id = "46b4340e-6500-420b-9d9e-f04a516e7f19",
             UserName = "mattietorrent@gmail.com",
             NormalizedUserName = "mattietorrent@gmail.com".ToUpper(),
             Email = "mattietorrent@gmail.com",

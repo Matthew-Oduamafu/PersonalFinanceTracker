@@ -40,5 +40,20 @@ public static class AuthEndpoints
             .WithSummary("Login a user")
             .WithDescription("Some description here<br/>Next line description here")
             .WithOpenApi();
+
+        group.MapPatch("refresh-token", async ([FromServices] IAuthManager authManager, [FromBody] LoginOrRegisterResponseDto user) =>
+            {
+                var res = await authManager.VerifyRefreshTokenAsync(user);
+                return TypedResults.Json(res);
+            })
+            .WithName("RefreshToken")
+            .Produces<RefreshTokenResponseDto>()
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status424FailedDependency)
+            .Produces(StatusCodes.Status500InternalServerError)
+            .WithSummary("Refresh token")
+            .WithDescription("Some description here<br/>Next line description here")
+            .WithOpenApi();
     }
 }

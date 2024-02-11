@@ -11,18 +11,18 @@ public class UserRolesConfiguration : IEntityTypeConfiguration<IdentityUserRole<
         builder.HasData(
             new IdentityUserRole<string>
             {
-                RoleId = "6f1072ca96c145cb83f0036c2562195b",
-                UserId = "71538c31f99f42078133f5e4c249d6f1"
+                RoleId = "76b2a881-be6d-4d6b-a108-09646e63938c",
+                UserId = "46b4340e-6500-420b-9d9e-f04a516e7f19"
             },
             new IdentityUserRole<string>
             {
-                RoleId = "1385990d8b8f4be9aac34606ceb76056",
-                UserId = "71538c31f99f42078133f5e4c249d6f1"
+                RoleId = "a7e6783e-c29e-4489-b582-9dc974865547",
+                UserId = "46b4340e-6500-420b-9d9e-f04a516e7f19"
             },
             new IdentityUserRole<string>
             {
-                RoleId = "e1e5b8e43bd64a2b93924c1e4bf28af2",
-                UserId = "71538c31f99f42078133f5e4c249d6f1"
+                RoleId = "6916d5e6-debd-4611-a34a-463aef71ae54",
+                UserId = "46b4340e-6500-420b-9d9e-f04a516e7f19"
             }
         );
     }

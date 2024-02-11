@@ -11,19 +11,19 @@ public class RoleConfiguration : IEntityTypeConfiguration<IdentityRole>
         builder.HasData(
             new IdentityRole
             {
-                Id = "1385990d8b8f4be9aac34606ceb76056",
+                Id = "76b2a881-be6d-4d6b-a108-09646e63938c",
                 Name = "Administrator",
                 NormalizedName = "ADMINISTRATOR"
             },
             new IdentityRole
             {
-                Id = "6f1072ca96c145cb83f0036c2562195b",
+                Id = "a7e6783e-c29e-4489-b582-9dc974865547",
                 Name = "Super Administrator",
                 NormalizedName = "SUPER ADMINISTRATOR"
             },
             new IdentityRole
             {
-                Id = "e1e5b8e43bd64a2b93924c1e4bf28af2",
+                Id = "6916d5e6-debd-4611-a34a-463aef71ae54",
                 Name = "User",
                 NormalizedName = "USER"
             }

@@ -28,4 +28,11 @@ public class LoginUserDto
 public class LoginOrRegisterResponseDto
 {
     public string Token { get; set; }
+    public string RefreshToken { get; set; }
+}
+
+public class RefreshTokenResponseDto
+{
+    public string Token { get; set; }
+    public string RefreshToken { get; set; }
 }
