@@ -22,7 +22,6 @@ public static class AccountEndpoints
                 
                 var response = await accountService.CreateAccountAsync(request);
                 return response.ToActionResult();
-                
             })
             .AddEndpointFilter<ValidationFilter<CreateAccountRequestDto>>()
             .WithName("Create")
@@ -42,7 +41,6 @@ public static class AccountEndpoints
                 
                 var response = await accountService.UpdateAccountAsync(request);
                 return response.ToActionResult();
-                
             })
             .AddEndpointFilter<ValidationFilter<UpdateAccountRequestDto>>()
             .WithName("Update")
@@ -58,7 +56,6 @@ public static class AccountEndpoints
             {
                 var response = await accountService.GetAccountAsync(id);
                 return response.ToActionResult();
-                
             })
             .WithName("Get")
             .Produces<IGenericApiResponse<AccountResponseDto>>()
@@ -72,7 +69,6 @@ public static class AccountEndpoints
             {
                 var response = await accountService.DeleteAccountAsync(id);
                 return response.ToActionResult();
-                
             })
             .WithName("Delete")
             .Produces<IGenericApiResponse<AccountResponseDto>>()
