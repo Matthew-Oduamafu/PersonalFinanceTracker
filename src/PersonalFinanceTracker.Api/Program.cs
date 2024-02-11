@@ -2,12 +2,10 @@ using System.Reflection;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Identity;
 using PersonalFinanceTracker.Api;
 using PersonalFinanceTracker.Api.Extensions;
 using PersonalFinanceTracker.Api.Extensions.EndpointsExtensions;
 using PersonalFinanceTracker.Api.Services.Interfaces;
-using PersonalFinanceTracker.Data.Data.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -71,6 +69,7 @@ var app = builder.Build();
     var linkService = serviceScope.ServiceProvider.GetRequiredService<ILinkService>();
 
     app.MapAuthEndpoints();
+    app.MapAccountEndpoints();
     app.MapEmployeeEndpoints(linkService);
 
     await app.RunAsync();

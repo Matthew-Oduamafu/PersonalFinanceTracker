@@ -28,16 +28,10 @@ public class AccountRepository : IAccountRepository
         return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> UpdateAsync(
+    public async Task<bool> UpdateAsync(Expression<Func<Account, bool>> predicate,
         Expression<Func<SetPropertyCalls<Account>, SetPropertyCalls<Account>>> setPropertyExpression)
     {
-        // Expression<Func<SetPropertyCalls<Account>, SetPropertyCalls<Account>>> setPropertyExpression = calls =>
-        //     calls
-        //         .SetProperty(p => p.Name, "New Name")
-        //         .SetProperty(p => p.UserId, "New Name")
-        //         .SetProperty(p => p.Balance, 20.3m);
-
-        var res = await _context.Accounts.ExecuteUpdateAsync(setPropertyExpression);
+        var res = await _context.Accounts.Where(predicate).ExecuteUpdateAsync(setPropertyExpression);
 
         return res > 0;
     }
@@ -47,6 +41,12 @@ public class AccountRepository : IAccountRepository
         var account = await _context.Accounts.FirstOrDefaultAsync(x => id.Equals(x.Id));
         if (account == null) return false;
 
+        _context.Accounts.Remove(account);
+        return await _context.SaveChangesAsync() > 0;
+    }
+
+    public async Task<bool> DeleteAsync(Account account)
+    {
         _context.Accounts.Remove(account);
         return await _context.SaveChangesAsync() > 0;
     }

@@ -26,6 +26,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<IGoalRepository, GoalRepository>();
+        services.AddScoped<IAppUserRepository, AppUserRepository>();
+        services.AddScoped<IImageRepository, ImageRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IPgRepository, PgRepository>();
         return services;
@@ -36,6 +38,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEmployeeService, EmployeeService>();
         services.AddScoped<ILinkService, LinkService>();
         services.AddScoped<IAuthManager, AuthManager>();
+        services.AddScoped<IAccountService, AccountService>();
         return services;
     }
 

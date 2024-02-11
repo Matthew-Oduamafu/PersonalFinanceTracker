@@ -1,4 +1,6 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using PersonalFinanceTracker.Data.Data;
 using PersonalFinanceTracker.Data.Data.Entities;
 using PersonalFinanceTracker.Data.Repositories.Interfaces;
@@ -26,11 +28,24 @@ public class TransactionRepository : ITransactionRepository
         return await _context.SaveChangesAsync() > 0;
     }
 
+    public async Task<bool> UpdateAsync(Expression<Func<Transaction, bool>> predicate,
+        Expression<Func<SetPropertyCalls<Transaction>, SetPropertyCalls<Transaction>>> setPropertyExpression)
+    {
+        var res = await _context.Transactions.Where(predicate).ExecuteUpdateAsync(setPropertyExpression);
+        return res > 0;
+    }
+
     public async Task<bool> DeleteAsync(string id)
     {
         var transaction = await _context.Transactions.FirstOrDefaultAsync(x => id.Equals(x.Id));
         if (transaction == null) return false;
 
+        _context.Transactions.Remove(transaction);
+        return await _context.SaveChangesAsync() > 0;
+    }
+
+    public async Task<bool> DeleteAsync(Transaction transaction)
+    {
         _context.Transactions.Remove(transaction);
         return await _context.SaveChangesAsync() > 0;
     }

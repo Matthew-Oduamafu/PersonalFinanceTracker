@@ -2,7 +2,8 @@ namespace PersonalFinanceTracker.Data.Models;
 
 public enum AccountType
 {
-    Checking,
+    Current,
     Savings,
-    CreditCard
+    CreditCard,
+    FixedDeposit
 }

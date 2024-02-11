@@ -18,11 +18,15 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Goal> Goals => Set<Goal>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
+    public DbSet<Image> Images => Set<Image>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        
+        // query filters
+        builder.Entity<AppUser>().HasQueryFilter(x => !x.IsDeleted);
     }
 }
 

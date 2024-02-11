@@ -43,10 +43,20 @@ public class EmployeeRepository : IEmployeeRepository
         return employee;
     }
 
-    public async Task<bool> UpdateAsync(string id, Expression<Func<SetPropertyCalls<Employee>, SetPropertyCalls<Employee>>> setPropertyExpression)
+    public async Task<bool> UpdateAsync(string id,
+        Expression<Func<SetPropertyCalls<Employee>, SetPropertyCalls<Employee>>> setPropertyExpression)
     {
         var res = await _dbContext.Employees
-            .Where(x=> id.Equals(x.Id))
+            .Where(x => id.Equals(x.Id))
+            .ExecuteUpdateAsync(setPropertyExpression);
+        return res > 0;
+    }
+
+    public async Task<bool> UpdateV2Async(Expression<Func<Employee, bool>> predicate,
+        Expression<Func<SetPropertyCalls<Employee>, SetPropertyCalls<Employee>>> setPropertyExpression)
+    {
+        var res = await _dbContext.Employees
+            .Where(predicate)
             .ExecuteUpdateAsync(setPropertyExpression);
         return res > 0;
     }

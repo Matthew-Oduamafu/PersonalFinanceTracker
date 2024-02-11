@@ -185,8 +185,10 @@ public class AuthManager : IAuthManager
             {
                 new Claim(JwtRegisteredClaimNames.Sub, _user.Id),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Email, _user.Email!),
+                new Claim(JwtRegisteredClaimNames.Email, _user.Email!),
                 new Claim(ClaimTypes.Name, _user.UserName!),
+                new Claim("UserEmail", _user.Email!),
+                new Claim("FullName", $"{_user.FirstName} {_user.LastName}"),
             }.Union(roleClaims).Union(userClaims)),
 
             Expires = DateTime.UtcNow.AddMinutes(_jwtConfig.AccessTokenExpiration),

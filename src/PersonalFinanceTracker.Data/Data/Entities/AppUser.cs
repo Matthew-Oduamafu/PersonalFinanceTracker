@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 #pragma warning disable CS8618
 
@@ -13,4 +12,11 @@ public class AppUser : IdentityUser
 
     [MaxLength(50)] 
     public string LastName { get; set; }
+
+    public DateTime? DateOfBirth { get; set; }
+
+    public bool IsDeleted { get; set; } = false;
+
+    public bool IsActive { get; set; } = true;
+    
 }
