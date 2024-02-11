@@ -80,13 +80,13 @@ public class AuthManager : IAuthManager
         {
             _user = await _userManager.FindByEmailAsync(user.Username);
             if (_user == null)
-                return GenericApiResponse<LoginOrRegisterResponseDto>.Default.ToBadRequestApiResponse(
+                return GenericApiResponse<LoginOrRegisterResponseDto>.Default.ToUnAuthorizedApiResponse(
                     "Email is not registered");
 
             var isCorrect = await _userManager.CheckPasswordAsync(_user, user.Password);
 
             if (!isCorrect)
-                return GenericApiResponse<LoginOrRegisterResponseDto>.Default.ToBadRequestApiResponse(
+                return GenericApiResponse<LoginOrRegisterResponseDto>.Default.ToUnAuthorizedApiResponse(
                     "Invalid password");
 
             var token = await GenerateToken();
@@ -133,7 +133,7 @@ public class AuthManager : IAuthManager
             _user = await _userManager.FindByEmailAsync(userEmail);
 
             if (_user == null)
-                return GenericApiResponse<RefreshTokenResponseDto>.Default.ToBadRequestApiResponse(
+                return GenericApiResponse<RefreshTokenResponseDto>.Default.ToUnAuthorizedApiResponse(
                     "Email is not registered");
 
             var isCorrect =
@@ -143,7 +143,7 @@ public class AuthManager : IAuthManager
             {
                 await _userManager.UpdateSecurityStampAsync(_user);
 
-                return GenericApiResponse<RefreshTokenResponseDto>.Default.ToBadRequestApiResponse(
+                return GenericApiResponse<RefreshTokenResponseDto>.Default.ToUnAuthorizedApiResponse(
                     "Invalid refresh token");
             }
 

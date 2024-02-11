@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using PersonalFinanceTracker.Api.CustomFilters;
+using PersonalFinanceTracker.Api.Models;
 using PersonalFinanceTracker.Api.Services.Interfaces;
 using PersonalFinanceTracker.Data.Models.Dtos;
 
@@ -15,13 +16,13 @@ public static class AuthEndpoints
         group.MapPost("register", async ([FromServices] IAuthManager authManager, [FromBody] AppUserDto user) =>
             {
                 var res = await authManager.RegisterUserAsync(user);
-                return TypedResults.Json(res);
+                return res.ToActionResult();
             })
             .AddEndpointFilter<ValidationFilter<AppUserDto>>()
             .WithName("RegisterUser")
-            .Produces<LoginOrRegisterResponseDto>()
-            .Produces(StatusCodes.Status424FailedDependency)
-            .Produces(StatusCodes.Status500InternalServerError)
+            .Produces<IGenericApiResponse<LoginOrRegisterResponseDto>>(StatusCodes.Status201Created)
+            .Produces<IGenericApiResponse<object>>(StatusCodes.Status424FailedDependency)
+            .Produces<IGenericApiResponse<object>>(StatusCodes.Status500InternalServerError)
             .WithSummary("Register a new user")
             .WithDescription("Some description here<br/>Next line description here")
             .WithOpenApi();
@@ -29,29 +30,30 @@ public static class AuthEndpoints
         group.MapPost("login", async ([FromServices] IAuthManager authManager, [FromBody] LoginUserDto user) =>
             {
                 var res = await authManager.LoginAsync(user);
-                return TypedResults.Json(res);
+                return res.ToActionResult();
             })
             .AddEndpointFilter<ValidationFilter<LoginUserDto>>()
             .WithName("LoginUser")
-            .Produces<LoginOrRegisterResponseDto>()
-            .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status424FailedDependency)
-            .Produces(StatusCodes.Status500InternalServerError)
+            .Produces<IGenericApiResponse<LoginOrRegisterResponseDto>>()
+            .Produces<IGenericApiResponse<object>>(StatusCodes.Status401Unauthorized)
+            .Produces<IGenericApiResponse<object>>(StatusCodes.Status424FailedDependency)
+            .Produces<IGenericApiResponse<object>>(StatusCodes.Status500InternalServerError)
             .WithSummary("Login a user")
             .WithDescription("Some description here<br/>Next line description here")
             .WithOpenApi();
 
-        group.MapPatch("refresh-token", async ([FromServices] IAuthManager authManager, [FromBody] LoginOrRegisterResponseDto user) =>
-            {
-                var res = await authManager.VerifyRefreshTokenAsync(user);
-                return TypedResults.Json(res);
-            })
+        group.MapPatch("refresh-token",
+                async ([FromServices] IAuthManager authManager, [FromBody] LoginOrRegisterResponseDto user) =>
+                {
+                    var res = await authManager.VerifyRefreshTokenAsync(user);
+                    return res.ToActionResult();
+                })
             .WithName("RefreshToken")
-            .Produces<RefreshTokenResponseDto>()
-            .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status424FailedDependency)
-            .Produces(StatusCodes.Status500InternalServerError)
+            .Produces<IGenericApiResponse<LoginOrRegisterResponseDto>>()
+            .Produces<IGenericApiResponse<object>>(StatusCodes.Status401Unauthorized)
+            .Produces<IGenericApiResponse<object>>(StatusCodes.Status401Unauthorized)
+            .Produces<IGenericApiResponse<object>>(StatusCodes.Status424FailedDependency)
+            .Produces<IGenericApiResponse<object>>(StatusCodes.Status500InternalServerError)
             .WithSummary("Refresh token")
             .WithDescription("Some description here<br/>Next line description here")
             .WithOpenApi();
