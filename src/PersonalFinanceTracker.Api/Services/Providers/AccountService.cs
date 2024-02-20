@@ -1,9 +1,12 @@
+using System.Linq.Expressions;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore.Query;
 using PersonalFinanceTracker.Api.Extensions;
 using PersonalFinanceTracker.Api.Extensions.DtoExtensions;
 using PersonalFinanceTracker.Api.Models;
 using PersonalFinanceTracker.Api.Models.RequestFilters;
 using PersonalFinanceTracker.Api.Services.Interfaces;
+using PersonalFinanceTracker.Data.Data.Entities;
 using PersonalFinanceTracker.Data.Models.Dtos;
 using PersonalFinanceTracker.Data.Repositories.Interfaces;
 
@@ -63,7 +66,17 @@ public class AccountService : IAccountService
                 JsonSerializer.Serialize(request));
 
             var account = request.ToAccount();
-            var result = await _accountRepository.UpdateAsync(account);
+            
+            var Ids = new List<string> { "1", "2", "3" };
+
+            Expression<Func<Account, bool>> predicate = x => Ids.Contains(x.Id);
+            
+            Expression<Func<SetPropertyCalls<Account>, SetPropertyCalls<Account>>> setPropertyExpression = x => x
+                .SetProperty(y => y.AccountType, "")
+                .SetProperty(y => y.Name, "")
+                .SetProperty(y => y.UserId, "");
+            
+            var result = await _accountRepository.UpdateAsync(predicate, setPropertyExpression);
 
             if (!result)
             {
@@ -120,32 +133,56 @@ public class AccountService : IAccountService
         }
     }
 
+    // public async Task<IGenericApiResponse<AccountResponseDto>> GetAccountAsync(string id)
+    // {
+    //     try
+    //     {
+    //         _logger.LogInformation("Getting account with id {Id}", id);
+    //
+    //         var account = await _accountRepository.GetAsync(id);
+    //
+    //         if (account == null)
+    //         {
+    //             _logger.LogWarning("Account with id {Id} not found", id);
+    //             return GenericApiResponse<AccountResponseDto>.Default.ToNotFoundApiResponse();
+    //         }
+    //
+    //         throw new Exception($"Error getting account with id {id}");
+    //
+    //         var response = account.ToResponse();
+    //         AddLinksForAccount(response);
+    //
+    //         _logger.LogInformation("Account with id {Id} found", id);
+    //
+    //         return response.ToOkApiResponse();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _logger.LogError(ex, "Error getting account");
+    //         return GenericApiResponse<AccountResponseDto>.Default.ToInternalServerErrorApiResponse();
+    //     }
+    // }
+
     public async Task<IGenericApiResponse<AccountResponseDto>> GetAccountAsync(string id)
     {
-        try
+        _logger.LogInformation("Getting account with id {Id}", id);
+
+        var account = await _accountRepository.GetAsync(id);
+
+        if (account == null)
         {
-            _logger.LogInformation("Getting account with id {Id}", id);
-
-            var account = await _accountRepository.GetAsync(id);
-
-            if (account == null)
-            {
-                _logger.LogWarning("Account with id {Id} not found", id);
-                return GenericApiResponse<AccountResponseDto>.Default.ToNotFoundApiResponse();
-            }
-
-            var response = account.ToResponse();
-            AddLinksForAccount(response);
-
-            _logger.LogInformation("Account with id {Id} found", id);
-
-            return response.ToOkApiResponse();
+            _logger.LogWarning("Account with id {Id} not found", id);
+            return GenericApiResponse<AccountResponseDto>.Default.ToNotFoundApiResponse();
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting account");
-            return GenericApiResponse<AccountResponseDto>.Default.ToInternalServerErrorApiResponse();
-        }
+
+        throw new Exception($"Error getting account with id {id}");
+
+        var response = account.ToResponse();
+        AddLinksForAccount(response);
+
+        _logger.LogInformation("Account with id {Id} found", id);
+
+        return response.ToOkApiResponse();
     }
 
     public async Task<IGenericApiResponse<PagedList<AccountResponseDto>>> GetAccountsAsync(AccountFilter filter)

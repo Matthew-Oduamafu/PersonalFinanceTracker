@@ -14,7 +14,6 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
     {
     }
 
-    public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Goal> Goals => Set<Goal>();
     public DbSet<Transaction> Transactions => Set<Transaction>();

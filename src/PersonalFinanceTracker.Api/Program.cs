@@ -5,7 +5,6 @@ using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using PersonalFinanceTracker.Api;
 using PersonalFinanceTracker.Api.Extensions;
 using PersonalFinanceTracker.Api.Extensions.EndpointsExtensions;
-using PersonalFinanceTracker.Api.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDatabaseConfiguration(builder.Configuration);
 builder.Services.AddRepositories();
 builder.Services.AddServices();
+builder.Services.AddExternalServicesAndConfigs();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddControllerConfiguration();
@@ -42,16 +42,25 @@ builder.Services.AddFluentValidationRulesToSwagger();
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-CSRF-TOKEN";
+    options.SuppressXFrameOptionsHeader = false;
+});
+
 var app = builder.Build();
 
 {
     var logger = app.Logger;
+    
     await app.MigrateDatabaseAsync();
 // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
         app.UseDeveloperExceptionPage();
     else
+    {
         app.UseCustomExceptionHandler(logger);
+    }
 
     app.UseSwaggerDocumentation();
 
@@ -62,15 +71,11 @@ var app = builder.Build();
     app.UseAuthentication();
     app.UseAuthorization();
     
-    using var serviceScope = app.Services
-        .GetRequiredService<IServiceScopeFactory>()
-        .CreateScope();
-
-    var linkService = serviceScope.ServiceProvider.GetRequiredService<ILinkService>();
+    app.UseAntiforgery();
 
     app.MapAuthEndpoints();
     app.MapAccountEndpoints();
-    app.MapEmployeeEndpoints(linkService);
+    app.MapBlobEndpoints();
 
     await app.RunAsync();
 }

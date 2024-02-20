@@ -33,7 +33,8 @@ public static class BaseActionResult
             StatusCodes.Status424FailedDependency => Results.Content(json, contentType: "application/json",
                 statusCode: StatusCodes.Status424FailedDependency),
             
-            StatusCodes.Status500InternalServerError => Results.Problem(json, statusCode: StatusCodes.Status500InternalServerError),
+            StatusCodes.Status500InternalServerError => Results.Content(json, contentType: "application/json",
+                statusCode: StatusCodes.Status500InternalServerError),
             
             _ => Results.Problem(json, statusCode: StatusCodes.Status500InternalServerError)
         };

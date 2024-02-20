@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Text;
 using Asp.Versioning;
+using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,6 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
-        services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<IGoalRepository, GoalRepository>();
         services.AddScoped<IAppUserRepository, AppUserRepository>();
@@ -35,10 +35,22 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
-        services.AddScoped<IEmployeeService, EmployeeService>();
         services.AddScoped<ILinkService, LinkService>();
         services.AddScoped<IAuthManager, AuthManager>();
         services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<IBlobService, BlobService>();
+        return services;
+    }
+    
+    public static IServiceCollection AddExternalServicesAndConfigs(this IServiceCollection services)
+    {
+        services.AddOptions<AzureBlobStorageConfig>()
+            .BindConfiguration(nameof(AzureBlobStorageConfig))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        
+        services.AddSingleton(u=> new BlobServiceClient(u.GetRequiredService<IOptions<AzureBlobStorageConfig>>().Value.ConnectionString));
+        
         return services;
     }
 
