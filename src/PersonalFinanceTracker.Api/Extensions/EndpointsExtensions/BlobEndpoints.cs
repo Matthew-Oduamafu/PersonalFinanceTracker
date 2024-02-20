@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc;
 using PersonalFinanceTracker.Api.Models;
 using PersonalFinanceTracker.Api.Services.Interfaces;
+using PersonalFinanceTracker.Data.Models.Dtos;
 
 namespace PersonalFinanceTracker.Api.Extensions.EndpointsExtensions;
 
@@ -37,7 +38,7 @@ public static class BlobEndpoints
                 return response.ToActionResult();
             })
             .WithName("GetAllBlobs")
-            .Produces<IGenericApiResponse<List<string>>>()
+            .Produces<IGenericApiResponse<List<BlobResponseDto>>>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces<IGenericApiResponse<object>>(StatusCodes.Status500InternalServerError)
             .WithSummary("Get all blobs")
@@ -52,7 +53,7 @@ public static class BlobEndpoints
                     return response.ToActionResult();
                 })
             .WithName("GetBlob")
-            .Produces<IGenericApiResponse<string>>()
+            .Produces<IGenericApiResponse<BlobResponseDto>>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound)
             .Produces<IGenericApiResponse<object>>(StatusCodes.Status500InternalServerError)
@@ -69,7 +70,7 @@ public static class BlobEndpoints
                     return response.ToActionResult();
                 })
             .WithName("UploadBlob")
-            .Produces<IGenericApiResponse<string>>()
+            .Produces<IGenericApiResponse<BlobResponseDto>>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status424FailedDependency)
             .Produces<IGenericApiResponse<object>>(StatusCodes.Status500InternalServerError)

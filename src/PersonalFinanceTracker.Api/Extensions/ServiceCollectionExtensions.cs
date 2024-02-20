@@ -39,6 +39,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthManager, AuthManager>();
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IBlobService, BlobService>();
+        services.AddScoped<IImageService, ImageService>();
         return services;
     }
     

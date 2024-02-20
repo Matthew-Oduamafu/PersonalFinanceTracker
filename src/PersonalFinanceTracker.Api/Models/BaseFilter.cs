@@ -17,11 +17,13 @@ public class BaseFilter
         get => MinPageSize;
         set => MinPageSize = value > 0 ? value : 10;
     }
+
+    public string SortDir { get; set; } = "asc";
     
     public static bool TryParse(string s, IFormatProvider provider, out BaseFilter filter)
     {
         filter = new BaseFilter();
-        var parts = s.Split(',');
+        var parts = s.Split(';');
 
         if (parts.Length != 2)
             return false;
