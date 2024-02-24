@@ -32,6 +32,15 @@ public class AccountService : IAccountService
         {
             _logger.LogInformation("Creating account for user {UserId}, with request {Request}", request.UserId,
                 JsonSerializer.Serialize(request));
+            
+            var accountExists = await _accountRepository.ExistsAsync(request.UserId, request.Name, request.AccountType);
+            
+            if (accountExists)
+            {
+                _logger.LogWarning("Account already exists for user {UserId}, with request {Request}", request.UserId,
+                    JsonSerializer.Serialize(request));
+                return GenericApiResponse<AccountResponseDto>.Default.ToBadRequestApiResponse("You already have an account with the same name and type");
+            }
 
             var newAccount = request.ToAccount();
             var result = await _accountRepository.AddAsync(newAccount);
@@ -58,23 +67,27 @@ public class AccountService : IAccountService
         }
     }
 
-    public async Task<IGenericApiResponse<AccountResponseDto>> UpdateAccountAsync(UpdateAccountRequestDto request)
+    public async Task<IGenericApiResponse<AccountResponseDto>> UpdateAccountAsync(string id, UpdateAccountRequestDto request)
     {
         try
         {
             _logger.LogInformation("Updating account for user {UserId}, with request {Request}", request.UserId,
                 JsonSerializer.Serialize(request));
-
-            var account = request.ToAccount();
             
-            var Ids = new List<string> { "1", "2", "3" };
-
-            Expression<Func<Account, bool>> predicate = x => Ids.Contains(x.Id);
+            var accountExists = await _accountRepository.GetAsync(id);
             
+            if (accountExists is null)
+            {
+                _logger.LogWarning("Account with id {Id} not found", id);
+                return GenericApiResponse<AccountResponseDto>.Default.ToNotFoundApiResponse();
+            }
+            
+            Expression<Func<Account, bool>> predicate = x => id.Equals(x.Id);
             Expression<Func<SetPropertyCalls<Account>, SetPropertyCalls<Account>>> setPropertyExpression = x => x
-                .SetProperty(y => y.AccountType, "")
-                .SetProperty(y => y.Name, "")
-                .SetProperty(y => y.UserId, "");
+                .SetProperty(y => y.AccountType, request.AccountType)
+                .SetProperty(y => y.Name, request.Name)
+                .SetProperty(y => y.UpdatedBy, request.UpdatedBy)
+                .SetProperty(y => y.UpdatedAt, DateTime.UtcNow);
             
             var result = await _accountRepository.UpdateAsync(predicate, setPropertyExpression);
 
@@ -85,7 +98,7 @@ public class AccountService : IAccountService
                 return GenericApiResponse<AccountResponseDto>.Default.ToFailedDependenciesApiResponse();
             }
 
-            var response = account.ToResponse();
+            var response = accountExists.ToResponse();
             AddLinksForAccount(response);
 
             _logger.LogInformation("Account updated for user {UserId}, with response {Response}", request.UserId,
@@ -133,57 +146,34 @@ public class AccountService : IAccountService
         }
     }
 
-    // public async Task<IGenericApiResponse<AccountResponseDto>> GetAccountAsync(string id)
-    // {
-    //     try
-    //     {
-    //         _logger.LogInformation("Getting account with id {Id}", id);
-    //
-    //         var account = await _accountRepository.GetAsync(id);
-    //
-    //         if (account == null)
-    //         {
-    //             _logger.LogWarning("Account with id {Id} not found", id);
-    //             return GenericApiResponse<AccountResponseDto>.Default.ToNotFoundApiResponse();
-    //         }
-    //
-    //         throw new Exception($"Error getting account with id {id}");
-    //
-    //         var response = account.ToResponse();
-    //         AddLinksForAccount(response);
-    //
-    //         _logger.LogInformation("Account with id {Id} found", id);
-    //
-    //         return response.ToOkApiResponse();
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         _logger.LogError(ex, "Error getting account");
-    //         return GenericApiResponse<AccountResponseDto>.Default.ToInternalServerErrorApiResponse();
-    //     }
-    // }
-
     public async Task<IGenericApiResponse<AccountResponseDto>> GetAccountAsync(string id)
     {
-        _logger.LogInformation("Getting account with id {Id}", id);
-
-        var account = await _accountRepository.GetAsync(id);
-
-        if (account == null)
+        try
         {
-            _logger.LogWarning("Account with id {Id} not found", id);
-            return GenericApiResponse<AccountResponseDto>.Default.ToNotFoundApiResponse();
+            _logger.LogInformation("Getting account with id {Id}", id);
+    
+            var account = await _accountRepository.GetAsync(id);
+    
+            if (account == null)
+            {
+                _logger.LogWarning("Account with id {Id} not found", id);
+                return GenericApiResponse<AccountResponseDto>.Default.ToNotFoundApiResponse();
+            }
+            
+            var response = account.ToResponse();
+            AddLinksForAccount(response);
+    
+            _logger.LogInformation("Account with id {Id} found", id);
+    
+            return response.ToOkApiResponse();
         }
-
-        throw new Exception($"Error getting account with id {id}");
-
-        var response = account.ToResponse();
-        AddLinksForAccount(response);
-
-        _logger.LogInformation("Account with id {Id} found", id);
-
-        return response.ToOkApiResponse();
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting account");
+            return GenericApiResponse<AccountResponseDto>.Default.ToInternalServerErrorApiResponse();
+        }
     }
+    
 
     public async Task<IGenericApiResponse<PagedList<AccountResponseDto>>> GetAccountsAsync(AccountFilter filter)
     {
@@ -192,6 +182,11 @@ public class AccountService : IAccountService
             _logger.LogInformation("Getting accounts with filter {Filter}", JsonSerializer.Serialize(filter));
 
             var query = _accountRepository.GetAsQueryable();
+            
+            if (!string.IsNullOrWhiteSpace(filter.Name))
+            {
+                query = query.Where(x => x.Name.ToLower().Contains(filter.Name.ToLower()));
+            }
             
             if (!string.IsNullOrWhiteSpace(filter.AccountType))
             {

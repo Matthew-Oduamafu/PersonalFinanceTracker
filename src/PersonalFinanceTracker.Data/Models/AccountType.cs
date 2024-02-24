@@ -1,9 +1,9 @@
 namespace PersonalFinanceTracker.Data.Models;
 
-public enum AccountType
+public static class AccountType
 {
-    Current,
-    Savings,
-    CreditCard,
-    FixedDeposit
+    public const string Current = "Current";
+    public const string Savings = "Savings";
+    public const string CreditCard = "Credit Card";
+    public const string FixedDeposit = "Fixed Deposit";
 }

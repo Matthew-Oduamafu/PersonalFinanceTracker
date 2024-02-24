@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonalFinanceTracker.Api.Models;
 using PersonalFinanceTracker.Api.Services.Interfaces;
@@ -32,7 +33,7 @@ public static class BlobEndpoints
                 "Get the anti-forgery tokens to be used in the request headers for the POST, PUT, and DELETE operations")
             .WithOpenApi();
 
-        group.MapGet("", async ([FromServices] IBlobService blobService) =>
+        group.MapGet("", [Authorize(Roles = "Super Administrator,Administrator")] async ([FromServices] IBlobService blobService) =>
             {
                 var response = await blobService.GetBlobsAsync();
                 return response.ToActionResult();

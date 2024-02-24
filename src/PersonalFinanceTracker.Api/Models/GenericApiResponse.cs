@@ -54,7 +54,7 @@ public static class GenericApiResponseExtensions
     }
 
     public static GenericApiResponse<T> ToInternalServerErrorApiResponse<T>(this T? data,
-        string message = "Oh no! Something went wrong")
+        string message = "Oh no! Something went wrong. Please try again later.")
     {
         return ToApiResponse<T>(default, message, StatusCodes.Status500InternalServerError);
     }

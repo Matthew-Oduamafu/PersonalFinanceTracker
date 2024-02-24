@@ -14,5 +14,7 @@ public interface IAccountRepository
     Task<bool> DeleteAsync(string id);
     Task<bool> DeleteAsync(Account account);
     Task<Account?> GetAsync(string id);
+    Task<bool> ExistsAsync(string userId, string name, string accountType);
+    Task<bool> ExistsAsync(string id);
     IQueryable<Account> GetAsQueryable();
 }

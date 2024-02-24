@@ -3,6 +3,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using PersonalFinanceTracker.Api;
+using PersonalFinanceTracker.Api.CustomMiddleware;
 using PersonalFinanceTracker.Api.Extensions;
 using PersonalFinanceTracker.Api.Extensions.EndpointsExtensions;
 
@@ -35,6 +36,9 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddFluentValidationRulesToSwagger();
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 
 /***
  * Authentication and Authorization
@@ -51,16 +55,9 @@ builder.Services.AddAntiforgery(options =>
 var app = builder.Build();
 
 {
-    var logger = app.Logger;
-    
     await app.MigrateDatabaseAsync();
 // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment())
-        app.UseDeveloperExceptionPage();
-    else
-    {
-        app.UseCustomExceptionHandler(logger);
-    }
+    app.UseExceptionHandler();
 
     app.UseSwaggerDocumentation();
 
@@ -77,6 +74,7 @@ var app = builder.Build();
     app.MapAccountEndpoints();
     app.MapBlobEndpoints();
     app.MapImageEndpoints();
+    app.MapTransactionEndpoints();
 
     await app.RunAsync();
 }

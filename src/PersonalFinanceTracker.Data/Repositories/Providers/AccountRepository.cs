@@ -56,6 +56,19 @@ public class AccountRepository : IAccountRepository
         return await _context.Accounts.AsNoTracking().FirstOrDefaultAsync(x => id.Equals(x.Id));
     }
 
+    public async Task<bool> ExistsAsync(string userId, string name, string accountType)
+    {
+        var res = await _context.Accounts.AsNoTracking().AnyAsync(x =>
+            userId.Equals(x.UserId) && name.Equals(x.Name) && accountType.Equals(x.AccountType));
+        return res;
+    }
+
+    public async Task<bool> ExistsAsync(string id)
+    {
+        var res = await _context.Accounts.AsNoTracking().AnyAsync(x => id.Equals(x.Id));
+        return res;
+    }
+
     public IQueryable<Account> GetAsQueryable()
     {
         return _context.Accounts.AsNoTracking().AsQueryable();

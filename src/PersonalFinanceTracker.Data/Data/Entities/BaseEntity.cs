@@ -8,7 +8,7 @@ public abstract class BaseEntity
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [MaxLength(36)]
-    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     
     [MaxLength(100)] 
     public string CreatedBy { get; set; }

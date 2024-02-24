@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Net;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -19,21 +18,23 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
         httpContext.Response.ContentType = "application/json";
         httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
         
-        var problemDetails = new ProblemDetails
-        {
-            Status = httpContext.Response.StatusCode,
-            Title = "Oops! Internal Server Error.",
-            Detail = exception.Message,
-            Instance = httpContext.Request.Path,
-            Extensions = new Dictionary<string, object?>()
-        };
+        // var problemDetails = new ProblemDetails
+        // {
+        //     Status = httpContext.Response.StatusCode,
+        //     Title = "Oops! Internal Server Error.",
+        //     Detail = exception.Message,
+        //     Instance = httpContext.Request.Path,
+        //     Extensions = new Dictionary<string, object?>()
+        // };
         
-        var response = new ExceptionDetails
-        {
-            StatusCode = httpContext.Response.StatusCode,
-            Message = "Oops! Internal Server Error.",
-            Details = exception.Message
-        };
+        // var response = new ExceptionDetails
+        // {
+        //     StatusCode = httpContext.Response.StatusCode,
+        //     Message = "Oops! Internal Server Error.",
+        //     Details = exception.Message
+        // };
+        
+        var response = GenericApiResponse<object>.Default.ToInternalServerErrorApiResponse();
 
         await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
 

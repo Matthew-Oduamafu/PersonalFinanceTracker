@@ -7,6 +7,6 @@ public static class ExceptionMiddlewareExtensions
 {
     public static IApplicationBuilder UseCustomExceptionHandler(this IApplicationBuilder app, ILogger logger)
     {
-        return app.UseMiddleware<ExceptionMiddleware>(logger);
+        return app.UseMiddleware<GlobalExceptionHandler>(logger);
     }
 }

@@ -39,6 +39,8 @@ public class ExceptionMiddleware
             Details = exception.ToString()
         };
 
-        await context.Response.WriteAsJsonAsync(response);
+        var result = GenericApiResponse<object>.Default.ToInternalServerErrorApiResponse();
+
+        await context.Response.WriteAsJsonAsync(result);
     }
 }

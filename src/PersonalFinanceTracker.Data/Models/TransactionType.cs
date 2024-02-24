@@ -1,7 +1,7 @@
 namespace PersonalFinanceTracker.Data.Models;
 
-public enum TransactionType
+public static class TransactionType
 {
-    Income,
-    Expense
+    public const string Income = "Income";
+    public const string Expense = "Expense";
 }
