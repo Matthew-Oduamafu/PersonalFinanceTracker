@@ -7,56 +7,49 @@ using PersonalFinanceTracker.Data.Repositories.Interfaces;
 
 namespace PersonalFinanceTracker.Data.Repositories.Providers;
 
-public class AppUserRepository : IAppUserRepository
+public class AppUserRepository(ApplicationDbContext context) : IAppUserRepository
 {
-    private readonly ApplicationDbContext _context;
-
-    public AppUserRepository(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<bool> AddAsync(AppUser appUser)
     {
-        await _context.Users.AddAsync(appUser);
-        return await _context.SaveChangesAsync() > 0;
+        await context.Users.AddAsync(appUser);
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> UpdateAsync(AppUser appUser)
     {
-        _context.Users.Update(appUser);
-        return await _context.SaveChangesAsync() > 0;
+        context.Users.Update(appUser);
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> UpdateAsync(Expression<Func<AppUser, bool>> predicate,
         Expression<Func<SetPropertyCalls<AppUser>, SetPropertyCalls<AppUser>>> setPropertyExpression)
     {
-        var res = await _context.Users.Where(predicate).ExecuteUpdateAsync(setPropertyExpression);
+        var res = await context.Users.Where(predicate).ExecuteUpdateAsync(setPropertyExpression);
         return res > 0;
     }
 
     public async Task<bool> DeleteAsync(string id)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(x => id.Equals(x.Id));
+        var user = await context.Users.FirstOrDefaultAsync(x => id.Equals(x.Id));
         if (user == null) return false;
 
-        _context.Users.Remove(user);
-        return await _context.SaveChangesAsync() > 0;
+        context.Users.Remove(user);
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> DeleteAsync(AppUser appUser)
     {
-        _context.Users.Remove(appUser);
-        return await _context.SaveChangesAsync() > 0;
+        context.Users.Remove(appUser);
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<AppUser?> GetAsync(string id)
     {
-        return await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => id.Equals(x.Id));
+        return await context.Users.AsNoTracking().FirstOrDefaultAsync(x => id.Equals(x.Id));
     }
 
     public IQueryable<AppUser> GetAsQueryable()
     {
-        return _context.Users.AsNoTracking().AsQueryable();
+        return context.Users.AsNoTracking().AsQueryable();
     }
 }

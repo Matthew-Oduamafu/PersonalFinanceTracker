@@ -7,56 +7,49 @@ using PersonalFinanceTracker.Data.Repositories.Interfaces;
 
 namespace PersonalFinanceTracker.Data.Repositories.Providers;
 
-public class TransactionRepository : ITransactionRepository
+public class TransactionRepository(ApplicationDbContext context) : ITransactionRepository
 {
-    private readonly ApplicationDbContext _context;
-
-    public TransactionRepository(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<bool> AddAsync(Transaction transaction)
     {
-        await _context.Transactions.AddAsync(transaction);
-        return await _context.SaveChangesAsync() > 0;
+        await context.Transactions.AddAsync(transaction);
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> UpdateAsync(Transaction transaction)
     {
-        _context.Transactions.Update(transaction);
-        return await _context.SaveChangesAsync() > 0;
+        context.Transactions.Update(transaction);
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> UpdateAsync(Expression<Func<Transaction, bool>> predicate,
         Expression<Func<SetPropertyCalls<Transaction>, SetPropertyCalls<Transaction>>> setPropertyExpression)
     {
-        var res = await _context.Transactions.Where(predicate).ExecuteUpdateAsync(setPropertyExpression);
+        var res = await context.Transactions.Where(predicate).ExecuteUpdateAsync(setPropertyExpression);
         return res > 0;
     }
 
     public async Task<bool> DeleteAsync(string id)
     {
-        var transaction = await _context.Transactions.FirstOrDefaultAsync(x => id.Equals(x.Id));
+        var transaction = await context.Transactions.FirstOrDefaultAsync(x => id.Equals(x.Id));
         if (transaction == null) return false;
 
-        _context.Transactions.Remove(transaction);
-        return await _context.SaveChangesAsync() > 0;
+        context.Transactions.Remove(transaction);
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> DeleteAsync(Transaction transaction)
     {
-        _context.Transactions.Remove(transaction);
-        return await _context.SaveChangesAsync() > 0;
+        context.Transactions.Remove(transaction);
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<Transaction?> GetAsync(string id)
     {
-        return await _context.Transactions.AsNoTracking().FirstOrDefaultAsync(x => id.Equals(x.Id));
+        return await context.Transactions.AsNoTracking().FirstOrDefaultAsync(x => id.Equals(x.Id));
     }
 
     public IQueryable<Transaction> GetAsQueryable()
     {
-        return _context.Transactions.AsNoTracking().AsQueryable();
+        return context.Transactions.AsNoTracking().AsQueryable();
     }
 }
