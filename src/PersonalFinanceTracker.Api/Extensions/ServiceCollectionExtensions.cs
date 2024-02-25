@@ -41,6 +41,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBlobService, BlobService>();
         services.AddScoped<IImageService, ImageService>();
         services.AddScoped<ITransactionService, TransactionService>();
+        services.AddScoped<IGoalService, GoalService>();
         return services;
     }
     

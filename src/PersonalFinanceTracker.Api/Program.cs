@@ -75,6 +75,7 @@ var app = builder.Build();
     app.MapBlobEndpoints();
     app.MapImageEndpoints();
     app.MapTransactionEndpoints();
+    app.MapGoalEndpoints();
 
     await app.RunAsync();
 }

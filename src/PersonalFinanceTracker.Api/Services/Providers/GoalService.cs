@@ -32,7 +32,7 @@ public class GoalService(ILogger<GoalService> logger, IGoalRepository goalRepo) 
             
             logger.LogInformation("Successfully created goal with response {@Response}", response.ToJson());
             
-            return response.ToOkApiResponse();
+            return response.ToCreatedApiResponse();
         }
         catch (Exception ex)
         {
@@ -77,7 +77,7 @@ public class GoalService(ILogger<GoalService> logger, IGoalRepository goalRepo) 
             
             logger.LogInformation("Successfully updated goal with response {@Response}", response.ToJson());
             
-            return response.ToOkApiResponse();
+            return response.ToAcceptedApiResponse();
         }
         catch (Exception ex)
         {
