@@ -1,4 +1,3 @@
-using PersonalFinanceTracker.Api.Models;
 using PersonalFinanceTracker.Api.Services.Interfaces;
 using PersonalFinanceTracker.Data.Models;
 
@@ -6,8 +5,8 @@ namespace PersonalFinanceTracker.Api.Services.Providers;
 
 internal sealed class LinkService : ILinkService
 {
-    private readonly LinkGenerator _linkGenerator;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly LinkGenerator _linkGenerator;
 
     public LinkService(LinkGenerator linkGenerator, IHttpContextAccessor httpContextAccessor)
     {
@@ -19,9 +18,9 @@ internal sealed class LinkService : ILinkService
     {
         return new Link
         (
-            Href: _linkGenerator.GetUriByName(_httpContextAccessor.HttpContext!, endpointName, parameters),
-            Rel: rel,
-            Method: methodName
+            _linkGenerator.GetUriByName(_httpContextAccessor.HttpContext!, endpointName, parameters),
+            rel,
+            methodName
         );
     }
 }

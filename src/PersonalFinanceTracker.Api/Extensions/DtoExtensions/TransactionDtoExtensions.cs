@@ -17,6 +17,7 @@ public static class TransactionDtoExtensions
             CreatedBy = dto.CreatedBy
         };
     }
+
     public static Transaction ToTransaction(this UpdateTransactionRequestDto dto)
     {
         return new Transaction
@@ -29,7 +30,7 @@ public static class TransactionDtoExtensions
             CreatedBy = dto.UpdatedBy
         };
     }
-    
+
     public static TransactionResponseDto ToResponse(this Transaction obj)
     {
         return new TransactionResponseDto

@@ -64,10 +64,10 @@ var app = builder.Build();
     app.UseCors(CommonConstants.CorsPolicyName);
     app.UseRouting();
     app.UseHttpsRedirection();
-    
+
     app.UseAuthentication();
     app.UseAuthorization();
-    
+
     app.UseAntiforgery();
 
     app.MapAuthEndpoints();

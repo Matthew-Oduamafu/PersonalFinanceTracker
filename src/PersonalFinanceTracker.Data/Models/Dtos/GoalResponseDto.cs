@@ -10,4 +10,5 @@ public class GoalResponseDto
     public decimal CurrentAmount { get; set; } = 0;
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
+    public List<Link> Links { get; set; }
 }

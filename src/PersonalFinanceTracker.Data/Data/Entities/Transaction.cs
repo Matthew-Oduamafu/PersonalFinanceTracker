@@ -6,12 +6,12 @@ namespace PersonalFinanceTracker.Data.Data.Entities;
 
 public class Transaction : BaseEntity
 {
-    [MaxLength(36)]
-    public string AccountId { get; set; }
-    [MaxLength(300)]
-    public string Description { get; set; }
+    [MaxLength(36)] public string AccountId { get; set; }
+
+    [MaxLength(300)] public string Description { get; set; }
+
     public decimal Amount { get; set; }
     public DateTime TransactionDate { get; set; }
-    [MaxLength(50)]
-    public string TransactionType { get; set; }
+
+    [MaxLength(50)] public string TransactionType { get; set; }
 }

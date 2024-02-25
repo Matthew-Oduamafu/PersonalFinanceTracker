@@ -15,15 +15,13 @@ public class ValidationFilter<T> : IEndpointFilter
             if (entity is not null)
             {
                 var validation = await validator.ValidateAsync(entity);
-                if (validation.IsValid)
-                {
-                    return await next(context);
-                }
+                if (validation.IsValid) return await next(context);
                 return Results.ValidationProblem(validation.ToDictionary());
             }
 
             return Results.Problem("Could not find type to validate");
         }
+
         return await next(context);
     }
 }

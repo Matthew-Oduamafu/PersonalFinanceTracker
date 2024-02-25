@@ -17,6 +17,7 @@ public static class GoalDtoExtensions
             CreatedBy = dto.CreatedBy
         };
     }
+
     public static Goal ToGoal(this UpdateGoalRequestDto dto)
     {
         return new Goal
@@ -29,7 +30,7 @@ public static class GoalDtoExtensions
             CreatedBy = dto.UpdatedBy
         };
     }
-    
+
     public static GoalResponseDto ToResponse(this Goal goal)
     {
         return new GoalResponseDto

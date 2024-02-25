@@ -9,6 +9,6 @@ public class AccountResponseDto
     public string AccountType { get; set; }
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
-    
+
     public List<Link> Links { get; set; } = new();
 }

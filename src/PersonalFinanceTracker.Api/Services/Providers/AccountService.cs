@@ -14,9 +14,9 @@ namespace PersonalFinanceTracker.Api.Services.Providers;
 
 public class AccountService : IAccountService
 {
-    private readonly ILogger<AccountService> _logger;
     private readonly IAccountRepository _accountRepository;
     private readonly ILinkService _linkService;
+    private readonly ILogger<AccountService> _logger;
 
     public AccountService(ILogger<AccountService> logger, IAccountRepository accountRepository,
         ILinkService linkService)
@@ -32,14 +32,15 @@ public class AccountService : IAccountService
         {
             _logger.LogInformation("Creating account for user {UserId}, with request {Request}", request.UserId,
                 JsonSerializer.Serialize(request));
-            
+
             var accountExists = await _accountRepository.ExistsAsync(request.UserId, request.Name, request.AccountType);
-            
+
             if (accountExists)
             {
                 _logger.LogWarning("Account already exists for user {UserId}, with request {Request}", request.UserId,
                     JsonSerializer.Serialize(request));
-                return GenericApiResponse<AccountResponseDto>.Default.ToBadRequestApiResponse("You already have an account with the same name and type");
+                return GenericApiResponse<AccountResponseDto>.Default.ToBadRequestApiResponse(
+                    "You already have an account with the same name and type");
             }
 
             var newAccount = request.ToAccount();
@@ -67,28 +68,29 @@ public class AccountService : IAccountService
         }
     }
 
-    public async Task<IGenericApiResponse<AccountResponseDto>> UpdateAccountAsync(string id, UpdateAccountRequestDto request)
+    public async Task<IGenericApiResponse<AccountResponseDto>> UpdateAccountAsync(string id,
+        UpdateAccountRequestDto request)
     {
         try
         {
             _logger.LogInformation("Updating account for user {UserId}, with request {Request}", request.UserId,
                 JsonSerializer.Serialize(request));
-            
+
             var accountExists = await _accountRepository.GetAsync(id);
-            
+
             if (accountExists is null)
             {
                 _logger.LogWarning("Account with id {Id} not found", id);
                 return GenericApiResponse<AccountResponseDto>.Default.ToNotFoundApiResponse();
             }
-            
+
             Expression<Func<Account, bool>> predicate = x => id.Equals(x.Id);
             Expression<Func<SetPropertyCalls<Account>, SetPropertyCalls<Account>>> setPropertyExpression = x => x
                 .SetProperty(y => y.AccountType, request.AccountType)
                 .SetProperty(y => y.Name, request.Name)
                 .SetProperty(y => y.UpdatedBy, request.UpdatedBy)
                 .SetProperty(y => y.UpdatedAt, DateTime.UtcNow);
-            
+
             var result = await _accountRepository.UpdateAsync(predicate, setPropertyExpression);
 
             if (!result)
@@ -151,20 +153,20 @@ public class AccountService : IAccountService
         try
         {
             _logger.LogInformation("Getting account with id {Id}", id);
-    
+
             var account = await _accountRepository.GetAsync(id);
-    
+
             if (account == null)
             {
                 _logger.LogWarning("Account with id {Id} not found", id);
                 return GenericApiResponse<AccountResponseDto>.Default.ToNotFoundApiResponse();
             }
-            
+
             var response = account.ToResponse();
             AddLinksForAccount(response);
-    
+
             _logger.LogInformation("Account with id {Id} found", id);
-    
+
             return response.ToOkApiResponse();
         }
         catch (Exception ex)
@@ -173,7 +175,7 @@ public class AccountService : IAccountService
             return GenericApiResponse<AccountResponseDto>.Default.ToInternalServerErrorApiResponse();
         }
     }
-    
+
 
     public async Task<IGenericApiResponse<PagedList<AccountResponseDto>>> GetAccountsAsync(AccountFilter filter)
     {
@@ -182,39 +184,30 @@ public class AccountService : IAccountService
             _logger.LogInformation("Getting accounts with filter {Filter}", JsonSerializer.Serialize(filter));
 
             var query = _accountRepository.GetAsQueryable();
-            
+
             if (!string.IsNullOrWhiteSpace(filter.Name))
-            {
                 query = query.Where(x => x.Name.ToLower().Contains(filter.Name.ToLower()));
-            }
-            
+
             if (!string.IsNullOrWhiteSpace(filter.AccountType))
-            {
                 query = query.Where(x => x.AccountType == filter.AccountType);
-            }
-            
-            if (!string.IsNullOrWhiteSpace(filter.CreatedBy))
-            {
-                query = query.Where(x => x.CreatedBy == filter.CreatedBy);
-            }
-            
-            if (filter.FromDate.HasValue)
-            {
-                query = query.Where(x => x.CreatedAt >= filter.FromDate);
-            }
-            
-            if (filter.ToDate.HasValue)
-            {
-                query = query.Where(x => x.CreatedAt <= filter.ToDate);
-            }
-            
-            query = filter.SortDir == "desc" ? query.OrderByDescending(x => x.CreatedAt) : query.OrderBy(x => x.CreatedAt);
+
+            if (!string.IsNullOrWhiteSpace(filter.CreatedBy)) query = query.Where(x => x.CreatedBy == filter.CreatedBy);
+
+            if (filter.FromDate.HasValue) query = query.Where(x => x.CreatedAt >= filter.FromDate);
+
+            if (filter.ToDate.HasValue) query = query.Where(x => x.CreatedAt <= filter.ToDate);
+
+            query = filter.SortDir == "desc"
+                ? query.OrderByDescending(x => x.CreatedAt)
+                : query.OrderBy(x => x.CreatedAt);
 
             var responseQuery = query.Select(x => x.ToResponse());
-            
+
             var response = await responseQuery.ToPagedList(filter.Page, filter.PageSize);
-            
+
             _logger.LogInformation("Accounts found with filter {Filter}", JsonSerializer.Serialize(filter));
+
+            AddLinksForPagedAccounts(response, filter, _linkService);
 
             return response.ToOkApiResponse();
         }
@@ -233,5 +226,25 @@ public class AccountService : IAccountService
             _linkService.GenerateLink("Update", new { id = response.Id }, "update-account", "PUT"));
         response?.Links.Add(
             _linkService.GenerateLink("Delete", new { id = response.Id }, "delete-account", "DELETE"));
+    }
+
+    private static void AddLinksForPagedAccounts(PagedList<AccountResponseDto> apiResponse, BaseFilter filter,
+        ILinkService linkService)
+    {
+        if (apiResponse?.Items == null || !apiResponse.Items.Any()) return;
+
+        apiResponse.Links.Add(
+            linkService.GenerateLink("GetAll",
+                new { filter.Page, filter.PageSize }, "self", "GET"));
+
+        if (apiResponse.Page > 1)
+            apiResponse.Links.Add(
+                linkService.GenerateLink("GetAll",
+                    new { Page = filter.Page - 1, filter.PageSize }, "previous-page", "GET"));
+
+        if (apiResponse.Page < apiResponse.TotalPages)
+            apiResponse.Links.Add(
+                linkService.GenerateLink("GetAll",
+                    new { Page = filter.Page + 1, filter.PageSize }, "next-page", "GET"));
     }
 }

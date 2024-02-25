@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PersonalFinanceTracker.Api.CustomMiddleware;
+﻿using PersonalFinanceTracker.Api.CustomMiddleware;
 
 namespace PersonalFinanceTracker.Api.Extensions;
 

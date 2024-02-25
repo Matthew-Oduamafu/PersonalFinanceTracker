@@ -6,11 +6,11 @@ namespace PersonalFinanceTracker.Data.Data.Entities;
 
 public class Account : BaseEntity
 {
-    [MaxLength(36)]
-    public string UserId { get; set; }
-    [MaxLength(100)]
-    public string Name { get; set; }
+    [MaxLength(36)] public string UserId { get; set; }
+
+    [MaxLength(100)] public string Name { get; set; }
+
     public decimal Balance { get; set; }
-    [MaxLength(50)]
-    public string AccountType { get; set; }
+
+    [MaxLength(50)] public string AccountType { get; set; }
 }

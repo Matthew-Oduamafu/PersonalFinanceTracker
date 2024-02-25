@@ -12,6 +12,6 @@ public static class LongExtensions
             length = length / 1024L;
         }
 
-        return String.Format("{0:0.##} {1}", length, sizes[order]);
+        return string.Format("{0:0.##} {1}", length, sizes[order]);
     }
 }

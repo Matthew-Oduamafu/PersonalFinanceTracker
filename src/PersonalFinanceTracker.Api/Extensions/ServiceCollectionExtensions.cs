@@ -44,16 +44,17 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGoalService, GoalService>();
         return services;
     }
-    
+
     public static IServiceCollection AddExternalServicesAndConfigs(this IServiceCollection services)
     {
         services.AddOptions<AzureBlobStorageConfig>()
             .BindConfiguration(nameof(AzureBlobStorageConfig))
             .ValidateDataAnnotations()
             .ValidateOnStart();
-        
-        services.AddSingleton(u=> new BlobServiceClient(u.GetRequiredService<IOptions<AzureBlobStorageConfig>>().Value.ConnectionString));
-        
+
+        services.AddSingleton(u =>
+            new BlobServiceClient(u.GetRequiredService<IOptions<AzureBlobStorageConfig>>().Value.ConnectionString));
+
         return services;
     }
 
@@ -78,11 +79,9 @@ public static class ServiceCollectionExtensions
                 builder =>
                 {
                     if (dbConfig.EnableRetryOnFailure)
-                    {
                         builder.EnableRetryOnFailure(dbConfig.MaxRetryCount,
                             TimeSpan.FromMilliseconds(dbConfig.MaxRetryDelay),
                             dbConfig.ErrorNumbersToAdd);
-                    }
 
                     builder.CommandTimeout(dbConfig.CommandTimeout);
                 });
@@ -128,7 +127,7 @@ public static class ServiceCollectionExtensions
             options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
         }).AddJwtBearer(options =>
         {
-            options.TokenValidationParameters = new TokenValidationParameters()
+            options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
                 ValidateAudience = true,
@@ -137,7 +136,7 @@ public static class ServiceCollectionExtensions
                 ValidIssuer = jwtConfig.Issuer,
                 ValidAudience = jwtConfig.Audience,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Key)),
-                ClockSkew = TimeSpan.Zero,
+                ClockSkew = TimeSpan.Zero
             };
 
             options.Events = new JwtBearerEvents
@@ -145,9 +144,7 @@ public static class ServiceCollectionExtensions
                 OnAuthenticationFailed = context =>
                 {
                     if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
-                    {
                         context.Response.Headers.Append("Token-Expired", "true");
-                    }
 
                     return Task.CompletedTask;
                 }
@@ -175,17 +172,15 @@ public static class ServiceCollectionExtensions
                 Contact = new OpenApiContact
                 {
                     Email = "mattoduamafu@gmail.com",
-                    Extensions = { },
                     Name = "Matthew",
-                    Url = new Uri($"https://www.linkedin.com/in/matthew-oduamafu-42a1551a7/")
+                    Url = new Uri("https://www.linkedin.com/in/matthew-oduamafu-42a1551a7/")
                 },
                 License = new OpenApiLicense
                 {
                     Name = "License",
-                    Url = new Uri($"https://github.com/")
+                    Url = new Uri("https://github.com/")
                 },
-                Extensions = { },
-                TermsOfService = new Uri($"https://github.com/Matthew-Oduamafu")
+                TermsOfService = new Uri("https://github.com/Matthew-Oduamafu")
             });
 
             c.EnableAnnotations();
@@ -200,7 +195,7 @@ public static class ServiceCollectionExtensions
                 Scheme = "Bearer"
             });
 
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
                 {
                     new OpenApiSecurityScheme
@@ -212,7 +207,7 @@ public static class ServiceCollectionExtensions
                         },
                         Scheme = "oauth2",
                         Name = "Bearer",
-                        In = ParameterLocation.Header,
+                        In = ParameterLocation.Header
                     },
                     new List<string>()
                 }

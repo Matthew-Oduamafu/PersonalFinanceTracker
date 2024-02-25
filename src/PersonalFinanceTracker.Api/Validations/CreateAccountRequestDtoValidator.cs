@@ -9,7 +9,7 @@ public class CreateAccountRequestDtoValidator : AbstractValidator<CreateAccountR
     {
         ClassLevelCascadeMode = CascadeMode.Stop;
         RuleLevelCascadeMode = CascadeMode.Stop;
-        
+
         RuleFor(x => x.Name)
             .NotNull()
             .NotEmpty()
@@ -25,6 +25,5 @@ public class CreateAccountRequestDtoValidator : AbstractValidator<CreateAccountR
             .WithMessage("Account Type is required")
             .Matches(@"^(Savings|Current|FixedDeposit|CreditCard)$")
             .WithMessage("Invalid Account Type. Must be Savings, Current, FixedDeposit, or CreditCard.");
-
     }
 }

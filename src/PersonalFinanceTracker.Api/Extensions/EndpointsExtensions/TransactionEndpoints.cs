@@ -74,7 +74,8 @@ public static class TransactionEndpoints
                 "Please provide a valid guid for an existing transaction.")
             .WithOpenApi();
 
-        group.MapGet("", [Authorize(Roles = "Super Administrator,Administrator")] async ([FromServices] ITransactionService transactionService,
+        group.MapGet("", [Authorize(Roles = "Super Administrator,Administrator")] async (
+                [FromServices] ITransactionService transactionService,
                 [FromQuery] int? page,
                 [FromQuery] int? pageSize,
                 [FromQuery] string? accountId,

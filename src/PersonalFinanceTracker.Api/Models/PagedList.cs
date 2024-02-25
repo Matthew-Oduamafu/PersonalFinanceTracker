@@ -2,14 +2,8 @@ using PersonalFinanceTracker.Data.Models;
 
 namespace PersonalFinanceTracker.Api.Models;
 
-
 public sealed class PagedList<T> : BasePagedList where T : class
 {
-    public List<T> Items { get; set; } = new();
-    public List<Link> Links { get; set; } = new();
-
-    public int LowerBound => PageSize * (Page - 1) + 1;
-    public int UpperBound => TotalPages == Page ? TotalCount : Page * PageSize;
     public PagedList()
     {
     }
@@ -21,6 +15,12 @@ public sealed class PagedList<T> : BasePagedList where T : class
         PageSize = pageSize;
         TotalCount = totalCount;
     }
+
+    public List<T> Items { get; set; } = new();
+    public List<Link> Links { get; set; } = new();
+
+    public int LowerBound => PageSize * (Page - 1) + 1;
+    public int UpperBound => TotalPages == Page ? TotalCount : Page * PageSize;
 }
 
 public class BasePagedList
@@ -34,9 +34,9 @@ public class BasePagedList
     }
 
     private int MinPageSize { get; init; } = 10;
-    
+
     public bool HasPreviousPage => Page > 1;
-    
+
     public bool HasNextPage => Page < TotalPages;
 
     public int PageSize

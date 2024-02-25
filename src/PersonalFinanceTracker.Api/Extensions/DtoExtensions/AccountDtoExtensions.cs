@@ -16,7 +16,7 @@ public static class AccountDtoExtensions
             CreatedBy = dto.CreatedBy
         };
     }
-    
+
     public static Account ToAccount(this UpdateAccountRequestDto dto)
     {
         return new Account
@@ -28,7 +28,7 @@ public static class AccountDtoExtensions
             CreatedBy = dto.UpdatedBy
         };
     }
-    
+
     public static AccountResponseDto ToResponse(this Account obj)
     {
         return new AccountResponseDto

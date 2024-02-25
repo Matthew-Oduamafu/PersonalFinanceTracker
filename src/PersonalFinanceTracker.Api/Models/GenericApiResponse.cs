@@ -9,7 +9,10 @@ public interface IGenericApiResponse<out T>
     public static T? Default { get; } = default;
 }
 
-public sealed record GenericApiResponse<T>(string Message, int Code, T? Data = default,
+public sealed record GenericApiResponse<T>(
+    string Message,
+    int Code,
+    T? Data = default,
     IEnumerable<ErrorResponse>? Errors = default) : IGenericApiResponse<T>
 {
     public static T? Default = default;
@@ -38,7 +41,8 @@ public static class GenericApiResponseExtensions
 #pragma warning disable CS8604 // Possible null reference argument.
         => ToApiResponse<T>(default, message, StatusCodes.Status404NotFound);
 
-    public static GenericApiResponse<T> ToFailedDependenciesApiResponse<T>(this T? data, string message = "Failed Dependencies", IEnumerable<ErrorResponse>? errors = null)
+    public static GenericApiResponse<T> ToFailedDependenciesApiResponse<T>(this T? data,
+        string message = "Failed Dependencies", IEnumerable<ErrorResponse>? errors = null)
 #pragma warning disable CS8604 // Possible null reference argument.
         => ToApiResponse<T>(default, message, StatusCodes.Status424FailedDependency, errors);
 

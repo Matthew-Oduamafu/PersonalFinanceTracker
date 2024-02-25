@@ -3,7 +3,7 @@ using PersonalFinanceTracker.Data.Models.Dtos;
 
 namespace PersonalFinanceTracker.Api.Validations;
 
-public class CreateTransactionRequestDtoValidator: AbstractValidator<CreateTransactionRequestDto>
+public class CreateTransactionRequestDtoValidator : AbstractValidator<CreateTransactionRequestDto>
 {
     public CreateTransactionRequestDtoValidator()
     {

@@ -12,12 +12,10 @@ public class AccountRequest
 
 public class CreateAccountRequestDto : AccountRequest
 {
-    [JsonIgnore]
-    public string CreatedBy { get; set; }
+    [JsonIgnore] public string CreatedBy { get; set; }
 }
 
 public class UpdateAccountRequestDto : AccountRequest
 {
-    [JsonIgnore]
-    public string UpdatedBy { get; set; }
+    [JsonIgnore] public string UpdatedBy { get; set; }
 }

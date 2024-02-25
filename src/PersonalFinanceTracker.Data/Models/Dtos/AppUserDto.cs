@@ -9,7 +9,7 @@ public class AppUserDto
 {
     [JsonIgnore] public string UserName => Email;
     public string Password { get; set; }
-    
+
     public string Email { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
@@ -18,11 +18,9 @@ public class AppUserDto
 
 public class LoginUserDto
 {
-    [Required(AllowEmptyStrings = false)]
-    public string Username { get; set; }
+    [Required(AllowEmptyStrings = false)] public string Username { get; set; }
 
-    [Required(AllowEmptyStrings = false)] 
-    public string Password { get; set; }
+    [Required(AllowEmptyStrings = false)] public string Password { get; set; }
 }
 
 public class LoginOrRegisterResponseDto

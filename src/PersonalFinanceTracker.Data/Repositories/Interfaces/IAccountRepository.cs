@@ -11,6 +11,7 @@ public interface IAccountRepository
 
     public Task<bool> UpdateAsync(Expression<Func<Account, bool>> predicate,
         Expression<Func<SetPropertyCalls<Account>, SetPropertyCalls<Account>>> setPropertyExpression);
+
     Task<bool> DeleteAsync(string id);
     Task<bool> DeleteAsync(Account account);
     Task<Account?> GetAsync(string id);

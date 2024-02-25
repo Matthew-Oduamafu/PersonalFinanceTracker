@@ -14,34 +14,31 @@ using PersonalFinanceTracker.Data.Repositories.Interfaces;
 
 namespace PersonalFinanceTracker.Api.Services.Providers;
 
-public class BlobService : IBlobService
+public class BlobService(
+    ILogger<BlobService> logger,
+    BlobServiceClient blobServiceClient,
+    IImageRepository imageRepo,
+    IHttpContextAccessor httpContextAccessor,
+    IOptionsMonitor<AzureBlobStorageConfig> azureBlobStorageConfigOpt,
+    ILinkService linkService)
+    : IBlobService
 {
-    private readonly ILogger<BlobService> _logger;
-    private readonly BlobServiceClient _blobServiceClient;
-    private readonly IImageRepository _imageRepo;
-    private readonly string _userId;
-    private readonly string _userEmail;
-    private readonly string _containerName;
+    private readonly string _containerName = azureBlobStorageConfigOpt.CurrentValue.ImageContainerName;
 
-    public BlobService(ILogger<BlobService> logger, BlobServiceClient blobServiceClient, IImageRepository imageRepo, 
-        IHttpContextAccessor httpContextAccessor, IOptionsMonitor<AzureBlobStorageConfig> azureBlobStorageConfigOpt)
-    {
-        _logger = logger;
-        _blobServiceClient = blobServiceClient;
-        _imageRepo = imageRepo;
-        _userId = httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-        _userEmail = httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
-        _containerName = azureBlobStorageConfigOpt.CurrentValue.ImageContainerName;
-    }
+    private readonly string _userEmail =
+        httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
+
+    private readonly string _userId =
+        httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
 
     public async Task<IGenericApiResponse<List<BlobResponseDto>>> GetBlobsAsync()
     {
         try
         {
-            _logger.LogInformation("Getting blobs from container: {ContainerName}", _containerName);
-            
-            var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
-            
+            logger.LogInformation("Getting blobs from container: {ContainerName}", _containerName);
+
+            var containerClient = blobServiceClient.GetBlobContainerClient(_containerName);
+
             var blobs = new List<BlobResponseDto>();
             await foreach (var blobItem in containerClient.GetBlobsAsync())
             {
@@ -51,7 +48,7 @@ public class BlobService : IBlobService
                     out var value)
                     ? value
                     : string.Empty;
-                
+
                 blobs.Add(new BlobResponseDto
                 {
                     FileName = blobItem.Name,
@@ -61,12 +58,14 @@ public class BlobService : IBlobService
                     CreatedAt = blobItem.Properties?.CreatedOn?.DateTime
                 });
             }
-            
+
+            blobs.ForEach(AddLinksForBlob);
+
             return blobs.ToOkApiResponse();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, ex.Message);
+            logger.LogError(ex, ex.Message);
             return GenericApiResponse<List<BlobResponseDto>>.Default.ToInternalServerErrorApiResponse();
         }
     }
@@ -75,11 +74,12 @@ public class BlobService : IBlobService
     {
         try
         {
-            _logger.LogInformation("Getting blob: {BlobName} from container: {ContainerName}", blobName, _containerName);
-            
-            var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
+            logger.LogInformation("Getting blob: {BlobName} from container: {ContainerName}", blobName,
+                _containerName);
+
+            var containerClient = blobServiceClient.GetBlobContainerClient(_containerName);
             var blobClient = containerClient.GetBlobClient(blobName);
-            
+
             var blobProperties = await blobClient.GetPropertiesAsync();
 
             var originalFileName = blobProperties.Value.Metadata.TryGetValue("OriginalFileName",
@@ -94,14 +94,16 @@ public class BlobService : IBlobService
                 ReadableSize = blobProperties.Value.ContentLength.ToReadableSize(),
                 CreatedAt = blobProperties.Value.CreatedOn.DateTime
             };
-            
+
             await Task.CompletedTask;
-            
+
+            AddLinksForBlob(response);
+
             return response.ToOkApiResponse();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, ex.Message);
+            logger.LogError(ex, ex.Message);
             return GenericApiResponse<BlobResponseDto>.Default.ToInternalServerErrorApiResponse();
         }
     }
@@ -110,28 +112,28 @@ public class BlobService : IBlobService
     {
         try
         {
-            _logger.LogInformation("Uploading file: {FileName} to container: {ContainerName}", file.FileName, _containerName);
-            
-            var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
-            
+            logger.LogInformation("Uploading file: {FileName} to container: {ContainerName}", file.FileName,
+                _containerName);
+
+            var containerClient = blobServiceClient.GetBlobContainerClient(_containerName);
+
             var fileName = Guid.NewGuid().ToString("N") + Path.GetExtension(file.FileName);
-            
+
             var blobClient = containerClient.GetBlobClient(fileName);
-            
+
             var headers = new BlobHttpHeaders
             {
                 ContentType = file.ContentType
             };
             var metadata = new Dictionary<string, string>
             {
-                {"OriginalFileName", file.FileName}
+                { "OriginalFileName", file.FileName }
             };
-            
-            var result = await blobClient.UploadAsync(file.OpenReadStream(), httpHeaders: headers, metadata:metadata);
+
+            var result = await blobClient.UploadAsync(file.OpenReadStream(), headers, metadata);
 
             if (result?.GetRawResponse()?.Status == StatusCodes.Status201Created)
             {
-                
                 var image = new Image
                 {
                     UserId = _userId,
@@ -144,13 +146,12 @@ public class BlobService : IBlobService
                     ReadableSize = file.Length.ToReadableSize(),
                     CreatedBy = _userEmail
                 };
-                
-                var added = await _imageRepo.AddAsync(image);
+
+                var added = await imageRepo.AddAsync(image);
                 if (!added)
-                {
-                    _logger.LogError("Failed to save image to database. Image: {Image}", JsonSerializer.Serialize(image));
-                }
-                
+                    logger.LogError("Failed to save image to database. Image: {Image}",
+                        JsonSerializer.Serialize(image));
+
                 BlobResponseDto response = new()
                 {
                     FileName = fileName,
@@ -159,18 +160,21 @@ public class BlobService : IBlobService
                     ReadableSize = file.Length.ToReadableSize(),
                     CreatedAt = DateTime.UtcNow
                 };
-                
+
+                AddLinksForBlob(response);
+
                 return response.ToOkApiResponse();
             }
-            
-            _logger.LogError("Failed to upload file to blob storage. Result: {Result}", JsonSerializer.Serialize(result));
-                
-            return GenericApiResponse<BlobResponseDto>.Default.ToFailedDependenciesApiResponse("Failed to upload file to blob storage. Please try again.");
 
+            logger.LogError("Failed to upload file to blob storage. Result: {Result}",
+                JsonSerializer.Serialize(result));
+
+            return GenericApiResponse<BlobResponseDto>.Default.ToFailedDependenciesApiResponse(
+                "Failed to upload file to blob storage. Please try again.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, ex.Message);
+            logger.LogError(ex, ex.Message);
             return GenericApiResponse<BlobResponseDto>.Default.ToInternalServerErrorApiResponse();
         }
     }
@@ -179,34 +183,42 @@ public class BlobService : IBlobService
     {
         try
         {
-            _logger.LogInformation($"Deleting blob: {blobName} from container: {_containerName}");
-            
-            var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
+            logger.LogInformation("Deleting blob: {BlobName} from container: {ContainerName}", blobName,
+                _containerName);
+
+            var containerClient = blobServiceClient.GetBlobContainerClient(_containerName);
             var blobClient = containerClient.GetBlobClient(blobName);
             var result = await blobClient.DeleteIfExistsAsync();
 
             if (result)
             {
-                var image = await _imageRepo.GetAsQueryable().FirstOrDefaultAsync(x => x.FileName == blobName);
-                if (image != null)
-                {
-                    var removed = await _imageRepo.DeleteAsync(image);
-                    if (!removed)
-                    {
-                        _logger.LogError("Failed to remove image from database. Image: {Image}", JsonSerializer.Serialize(image));
-                    }
-                }
+                var image = await imageRepo.GetAsQueryable().FirstOrDefaultAsync(x => x.FileName == blobName);
+                if (image == null) return blobName.ToAcceptedApiResponse();
+                var removed = await imageRepo.DeleteAsync(image);
+                if (!removed)
+                    logger.LogError("Failed to remove image from database. Image: {Image}",
+                        JsonSerializer.Serialize(image));
+
                 return blobName.ToAcceptedApiResponse();
             }
-            
-            _logger.LogError("Failed to delete blob from blob storage. Result: {Result}", result);
-            
-            return GenericApiResponse<string>.Default.ToFailedDependenciesApiResponse("Failed to delete blob from blob storage. Please try again.");
+
+            logger.LogError("Failed to delete blob from blob storage. Result: {Result}", result);
+
+            return GenericApiResponse<string>.Default.ToFailedDependenciesApiResponse(
+                "Failed to delete blob from blob storage. Please try again.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, ex.Message);
+            logger.LogError(ex, ex.Message);
             return GenericApiResponse<string>.Default.ToInternalServerErrorApiResponse();
         }
+    }
+
+    private void AddLinksForBlob(BlobResponseDto response)
+    {
+        response?.Links.Add(
+            linkService.GenerateLink("GetBlob", new { blobName = response.FileName }, "self", "GET"));
+        response?.Links.Add(
+            linkService.GenerateLink("DeleteBlob", new { blobName = response.FileName }, "delete-blob", "DELETE"));
     }
 }

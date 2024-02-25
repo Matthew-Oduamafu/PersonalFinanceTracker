@@ -25,12 +25,12 @@ public static class SerializationExtension
 
         return JsonSerializer.Serialize(obj, options);
     }
-    
+
     public static T? FromJson<T>(this string json) where T : class
     {
         return JsonSerializer.Deserialize<T>(json);
     }
-    
+
     public static T? FromJsonV2<T>(this string json) where T : class
     {
         return JsonConvert.DeserializeObject<T>(json);

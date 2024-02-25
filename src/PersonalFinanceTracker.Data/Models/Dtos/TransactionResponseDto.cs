@@ -10,4 +10,5 @@ public class TransactionResponseDto
     public string TransactionType { get; set; }
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
+    public List<Link> Links { get; set; }
 }

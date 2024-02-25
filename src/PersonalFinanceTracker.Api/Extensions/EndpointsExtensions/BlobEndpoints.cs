@@ -18,10 +18,10 @@ public static class BlobEndpoints
         group.MapGet("get-anti-forgery-token", async (IAntiforgery antiforgery, HttpContext httpContext) =>
             {
                 var tokens = antiforgery.GetAndStoreTokens(httpContext);
-                
+
                 await Task.CompletedTask;
-                
-                return (new { tokens.RequestToken, tokens.HeaderName }).ToOkApiResponse().ToActionResult();
+
+                return new { tokens.RequestToken, tokens.HeaderName }.ToOkApiResponse().ToActionResult();
             })
             .AllowAnonymous()
             .WithName("GetAntiForgeryTokens")
@@ -33,11 +33,12 @@ public static class BlobEndpoints
                 "Get the anti-forgery tokens to be used in the request headers for the POST, PUT, and DELETE operations")
             .WithOpenApi();
 
-        group.MapGet("", [Authorize(Roles = "Super Administrator,Administrator")] async ([FromServices] IBlobService blobService) =>
-            {
-                var response = await blobService.GetBlobsAsync();
-                return response.ToActionResult();
-            })
+        group.MapGet("", [Authorize(Roles = "Super Administrator,Administrator")]
+                async ([FromServices] IBlobService blobService) =>
+                {
+                    var response = await blobService.GetBlobsAsync();
+                    return response.ToActionResult();
+                })
             .WithName("GetAllBlobs")
             .Produces<IGenericApiResponse<List<BlobResponseDto>>>()
             .Produces(StatusCodes.Status401Unauthorized)

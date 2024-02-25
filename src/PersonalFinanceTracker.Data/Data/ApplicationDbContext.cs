@@ -23,7 +23,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
     {
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        
+
         // query filters
         builder.Entity<AppUser>().HasQueryFilter(x => !x.IsDeleted);
     }
@@ -35,15 +35,15 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
     {
         // get environment\
         var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-        
+
         // build config
         var config = new ConfigurationBuilder()
             .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../PersonalFinanceTracker.Api"))
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddJsonFile($"appsettings.{environment}.json", optional: true)
+            .AddJsonFile("appsettings.json", false, true)
+            .AddJsonFile($"appsettings.{environment}.json", true)
             .AddEnvironmentVariables()
             .Build();
-        
+
         // get connection string
         var connectionString = config.GetConnectionString("DbConnection");
         // dbContext builder 

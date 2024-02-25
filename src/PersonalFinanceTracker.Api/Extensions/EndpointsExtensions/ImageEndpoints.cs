@@ -15,7 +15,8 @@ public static class ImageEndpoints
             .RequireAuthorization()
             .WithTags("Images");
 
-        group.MapGet("", [Authorize(Roles = "Super Administrator,Administrator")] async ([FromServices] IImageService imageService,
+        group.MapGet("", [Authorize(Roles = "Super Administrator,Administrator")] async (
+                [FromServices] IImageService imageService,
                 [FromQuery] int? page,
                 [FromQuery] int? pageSize,
                 [FromQuery] string? originalFileName,

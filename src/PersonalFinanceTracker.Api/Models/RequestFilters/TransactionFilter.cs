@@ -10,5 +10,4 @@ public class TransactionFilter : BaseFilter
     public DateTime? ToTransactionDate { get; set; }
     public DateTime? FromDate { get; set; }
     public DateTime? ToDate { get; set; }
-    
 }

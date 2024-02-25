@@ -8,8 +8,10 @@ public interface IImageRepository
 {
     Task<bool> AddAsync(Image image);
     Task<bool> UpdateAsync(Image image);
+
     Task<bool> UpdateAsync(Expression<Func<Image, bool>> predicate,
         Expression<Func<SetPropertyCalls<Image>, SetPropertyCalls<Image>>> setPropertyExpression);
+
     Task<bool> DeleteAsync(string id);
     Task<bool> DeleteAsync(Image image);
     Task<Image?> GetAsync(string id);

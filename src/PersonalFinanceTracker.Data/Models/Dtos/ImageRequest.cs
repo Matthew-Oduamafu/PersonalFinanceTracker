@@ -11,12 +11,10 @@ public class ImageRequest
     public string? ReadableSize { get; set; }
 }
 
-
 public class CreateImageRequestDto : ImageRequest
 {
     public string CreatedBy { get; set; }
 }
-
 
 public class UpdateImageRequestDto : ImageRequest
 {

@@ -13,12 +13,10 @@ public class TransactionRequest
 
 public class CreateTransactionRequestDto : TransactionRequest
 {
-    [JsonIgnore]
-    public string CreatedBy { get; set; }
+    [JsonIgnore] public string CreatedBy { get; set; }
 }
 
-public class UpdateTransactionRequestDto: TransactionRequest
+public class UpdateTransactionRequestDto : TransactionRequest
 {
-    [JsonIgnore]
-    public string UpdatedBy { get; set; }
+    [JsonIgnore] public string UpdatedBy { get; set; }
 }

@@ -7,4 +7,5 @@ public class BlobResponseDto
     public string Url { get; set; }
     public string ReadableSize { get; set; }
     public DateTime? CreatedAt { get; set; }
+    public List<Link> Links { get; set; }
 }

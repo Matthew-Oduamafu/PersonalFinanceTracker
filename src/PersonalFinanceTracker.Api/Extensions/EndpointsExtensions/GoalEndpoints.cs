@@ -74,8 +74,9 @@ public static class GoalEndpoints
             .WithDescription(
                 "Please provide a valid guid for an existing goal.")
             .WithOpenApi();
-        
-        group.MapGet("", [Authorize(Roles = "Super Administrator,Administrator")] async ([FromServices] IGoalService goalService,
+
+        group.MapGet("", [Authorize(Roles = "Super Administrator,Administrator")] async (
+                [FromServices] IGoalService goalService,
                 [FromQuery] int? page,
                 [FromQuery] int? pageSize,
                 [FromQuery] string? userId,
@@ -87,7 +88,7 @@ public static class GoalEndpoints
                 [FromQuery] DateTime? toDate,
                 [FromQuery] string? sortDir) =>
             {
-                var filter = new GoalFilter()
+                var filter = new GoalFilter
                 {
                     Page = page ?? 1,
                     PageSize = pageSize ?? 10,
@@ -111,6 +112,20 @@ public static class GoalEndpoints
             .WithSummary("Get all goals")
             .WithDescription(
                 "Get all goals with the specified filter. <br/>If no filter is specified, it will return all goals.<br/>This operation can only be performed by Super Admin")
+            .WithOpenApi();
+
+        group.MapDelete("{id}", async ([FromServices] IGoalService goalService, [FromRoute] string id) =>
+            {
+                var response = await goalService.DeleteGoalAsync(id);
+                return response.ToActionResult();
+            })
+            .WithName("DeleteGoal")
+            .Produces<IGenericApiResponse<AccountResponseDto>>()
+            .Produces<IGenericApiResponse<object>>(StatusCodes.Status404NotFound)
+            .Produces<IGenericApiResponse<object>>(StatusCodes.Status424FailedDependency)
+            .Produces<IGenericApiResponse<object>>(StatusCodes.Status500InternalServerError)
+            .WithSummary("Delete a goal")
+            .WithDescription("Please provide a valid Id for an existing goal.")
             .WithOpenApi();
     }
 }

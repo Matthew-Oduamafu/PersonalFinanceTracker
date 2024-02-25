@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Swashbuckle.AspNetCore.SwaggerUI;
 using PersonalFinanceTracker.Data.Data;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace PersonalFinanceTracker.Api.Extensions;
 
@@ -12,10 +12,10 @@ public static class ApplicationMiddlewareExtensions
         app.UseSwaggerUI(c =>
         {
             c.DocumentTitle = "PersonalFinanceTracker.Api";
-            
+
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "PersonalFinanceTracker.Api");
             c.RoutePrefix = "swagger";
-            
+
             // Optionally, enable XML documentation support in Swagger UI:
             c.EnableValidator();
             c.DefaultModelRendering(ModelRendering.Example);

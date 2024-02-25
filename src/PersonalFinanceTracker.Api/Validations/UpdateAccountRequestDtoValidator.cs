@@ -9,7 +9,7 @@ public class UpdateAccountRequestDtoValidator : AbstractValidator<UpdateAccountR
     {
         ClassLevelCascadeMode = CascadeMode.Stop;
         RuleLevelCascadeMode = CascadeMode.Stop;
-        
+
         RuleFor(x => x.Name)
             .NotNull()
             .NotEmpty()

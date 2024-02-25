@@ -1,6 +1,5 @@
 using System.Net;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using PersonalFinanceTracker.Api.Models;
 
 namespace PersonalFinanceTracker.Api.CustomMiddleware;
@@ -14,10 +13,10 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
         CancellationToken cancellationToken)
     {
         logger.LogError(exception, "Something went wrong: {ExMessage}", exception.Message);
-        
+
         httpContext.Response.ContentType = "application/json";
         httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-        
+
         // var problemDetails = new ProblemDetails
         // {
         //     Status = httpContext.Response.StatusCode,
@@ -26,14 +25,14 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
         //     Instance = httpContext.Request.Path,
         //     Extensions = new Dictionary<string, object?>()
         // };
-        
+
         // var response = new ExceptionDetails
         // {
         //     StatusCode = httpContext.Response.StatusCode,
         //     Message = "Oops! Internal Server Error.",
         //     Details = exception.Message
         // };
-        
+
         var response = GenericApiResponse<object>.Default.ToInternalServerErrorApiResponse();
 
         await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);

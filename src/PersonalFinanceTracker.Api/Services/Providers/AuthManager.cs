@@ -15,13 +15,12 @@ namespace PersonalFinanceTracker.Api.Services.Providers;
 
 public class AuthManager : IAuthManager
 {
-    private readonly ILogger<AuthManager> _logger;
-    private readonly JwtConfig _jwtConfig;
-    private readonly UserManager<AppUser> _userManager;
-    private AppUser _user;
-
     private const string RefreshToken = "RefreshToken";
     private const string LoginProvider = "PersonalFinanceTracker";
+    private readonly JwtConfig _jwtConfig;
+    private readonly ILogger<AuthManager> _logger;
+    private readonly UserManager<AppUser> _userManager;
+    private AppUser _user;
 
     public AuthManager(ILogger<AuthManager> logger,
         IOptionsMonitor<JwtConfig> jwtConfigOpt,
@@ -188,7 +187,7 @@ public class AuthManager : IAuthManager
                 new Claim(JwtRegisteredClaimNames.Email, _user.Email!),
                 new Claim(ClaimTypes.Name, _user.UserName!),
                 new Claim("UserEmail", _user.Email!),
-                new Claim("FullName", $"{_user.FirstName} {_user.LastName}"),
+                new Claim("FullName", $"{_user.FirstName} {_user.LastName}")
             }.Union(roleClaims).Union(userClaims)),
 
             Expires = DateTime.UtcNow.AddMinutes(_jwtConfig.AccessTokenExpiration),

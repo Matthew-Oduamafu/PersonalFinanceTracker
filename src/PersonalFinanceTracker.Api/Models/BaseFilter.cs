@@ -19,7 +19,7 @@ public class BaseFilter
     }
 
     public string SortDir { get; set; } = "asc";
-    
+
     public static bool TryParse(string s, IFormatProvider provider, out BaseFilter filter)
     {
         filter = new BaseFilter();
